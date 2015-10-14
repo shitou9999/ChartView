@@ -106,6 +106,9 @@ ChartView是一个extends view的自定义图标控件
 
 
 若有问题，可及时联系：
+
 QQ:452825089
+
 mail:452825089@qq.com
+
 blog:http://iceanson.github.io
