@@ -95,6 +95,8 @@ public class ChartViewConfig {
     private Bitmap mBitmapIndicator;
     //游标半径
     private int indicator_radius = 0;
+    //是否显示游标
+    private boolean isShowIndicator = true;
 
     //区域点
     private List<PointValue> listPointRegion = new ArrayList<>();
@@ -205,6 +207,15 @@ public class ChartViewConfig {
 
     public ChartViewConfig setIndicator_color(int indicator_color) {
         this.indicator_color = indicator_color;
+        return this;
+    }
+
+    public boolean isShowIndicator() {
+        return isShowIndicator;
+    }
+
+    public ChartViewConfig setIsShowIndicator(boolean isShowIndicator) {
+        this.isShowIndicator = isShowIndicator;
         return this;
     }
 

@@ -293,7 +293,8 @@ public class ChartView extends View {
      * @param canvas
      */
     protected void drawIndicator(Canvas canvas) {
-
+        if(!chartViewConfig.isShowIndicator())
+            return;
         //indicator坐标
         //x轴中间值
         int indicator_x = getWidth() / 2 + getScrollX();

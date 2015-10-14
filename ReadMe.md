@@ -91,7 +91,8 @@ ChartView是一个extends view的自定义图标控件
                 .setIndicatorBgRes(R.drawable.tree50)
                       //设置游标半径，默认游标是圆形的
                 .setIndicator_radius(100)
-
+					 //是否显示游标
+				.setIsShowIndicator(true).
                     //默认选中位置
                 .setItemSelection(1)
         ;
