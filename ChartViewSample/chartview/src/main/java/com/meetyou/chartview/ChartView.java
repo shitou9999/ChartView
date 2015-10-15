@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathEffect;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
@@ -37,9 +39,12 @@ public class ChartView extends View {
 
     //图表配置
     private ChartViewConfig chartViewConfig;
-
     //格子画笔
     private Paint mPaintGrid;
+    private Path[] mPathGridHorizontal;
+    private Path[] mPathGridVerical;
+    //横线刻度线画笔
+    private Paint mPaintHorizontalKedu;
 
     //竖向刻度画笔 字体大的
     private Paint mPaintLable;
@@ -47,6 +52,9 @@ public class ChartView extends View {
     private Paint mPaintLableSub;
     //竖向刻度单位画笔
     private Paint mPaintLableUnit;
+    //竖向刻度线画笔
+    private Paint mPaintVericalKedu;
+
     //竖向刻度额外填充x值
     private int verical_unit_extral_x_space;
 
@@ -73,6 +81,7 @@ public class ChartView extends View {
     private Paint mPaintCircle, mPaintCircleOutSide;
     //游标画笔
     private Paint mPaintIndicator;
+    private Paint mPaintIndicatorOutside;
     //游标标题画笔
     private Paint mPaintIndicatorTitle;
     private Paint mPaintIndicatorSubTitle;
@@ -135,7 +144,12 @@ public class ChartView extends View {
         chartViewConfig = config;
         //格子线和颜色
         mPaintGrid = new Paint();
+        //横线刻度线画笔
+        mPaintHorizontalKedu = new Paint();
+
         verical_unit_extral_x_space = 20;
+        //竖向刻度线画笔
+        mPaintVericalKedu = new Paint();
         //竖向大刻度文本画笔
         mPaintLable = new Paint();
         if (config.getVerical_unit_lable_color() > 0)
@@ -195,8 +209,8 @@ public class ChartView extends View {
 
         //点的内圆
         mPaintCircle = new Paint();
-        mPaintCircle.setStyle(Paint.Style.FILL);
-        mPaintCircle.setStrokeWidth(mDensity * 0.5f);
+        mPaintCircle.setStyle(Paint.Style.STROKE);
+        mPaintCircle.setStrokeWidth(mDensity * 2);
         if (config.getPoint_circle_color_interval() > 0)
             mPaintCircle.setColor(getResources().getColor(config.getPoint_circle_color_interval()));
         mPaintCircle.setTextSize(15 * mDensity);
@@ -204,11 +218,12 @@ public class ChartView extends View {
 
         //点的外圆
         mPaintCircleOutSide = new Paint();
-        mPaintCircleOutSide.setStyle(Paint.Style.STROKE);
-        mPaintCircleOutSide.setStrokeWidth(mDensity * 0.5f);
+        mPaintCircleOutSide.setStyle(Paint.Style.FILL);
+        mPaintCircleOutSide.setStrokeWidth(mDensity * 2f);
         if (config.getPoint_circle_color_outside() > 0)
             mPaintCircleOutSide.setColor(getResources().getColor(config.getPoint_circle_color_outside()));
         mPaintCircleOutSide.setAntiAlias(true);
+        //mPaintCircleOutSide.setAlpha(80);
 
         //游标圆的画笔
         mPaintIndicator = new Paint();
@@ -217,6 +232,14 @@ public class ChartView extends View {
         if (config.getIndicator_color() > 0)
             mPaintIndicator.setColor(getResources().getColor(config.getIndicator_color()));
         mPaintIndicator.setAntiAlias(true);
+
+        mPaintIndicatorOutside = new Paint();
+        mPaintIndicatorOutside.setStyle(Paint.Style.FILL);
+        mPaintIndicatorOutside.setStrokeWidth(mDensity * 2.0f);
+        if (config.getIndicator_outside_circle_color() > 0)
+            mPaintIndicatorOutside.setColor(getResources().getColor(config.getIndicator_outside_circle_color()));
+        mPaintIndicatorOutside.setAntiAlias(true);
+
 
         //游标连线
         mPaintIndicatorLineTop = new Paint();
@@ -387,12 +410,18 @@ public class ChartView extends View {
             }
          //默认游标，圆形
         }else{
+            //外圆
+            if(chartViewConfig.getIndicator_outside_circle_color()>0){
+                canvas.drawCircle(indicator_x,line_top_y_start-radius , radius+20, mPaintIndicatorOutside);
+            }
+            //内圆
             if(!chartViewConfig.isIndicatorMoveWithPoint()){
                 line_top_y_start-=radius;
                 canvas.drawCircle(indicator_x,line_top_y_start , radius, mPaintIndicator);
             }else{
                 canvas.drawCircle(indicator_x, line_top_y_start, radius, mPaintIndicator);
             }
+
         }
 
 
@@ -404,9 +433,9 @@ public class ChartView extends View {
         //绘制上半部分连线和下半部分连线的小圆圈,是节点就大圆，非节点就小圆
         //canvas.drawCircle(line_top_x_end, line_top_y_end,mDensity*3, mPaintIndicatorLineTop);
         if (isAtPoint) {
-            canvas.drawCircle(line_top_x_end, line_top_y_end, mDensity * 5, mPaintIndicatorLineTop);
+            canvas.drawCircle(line_top_x_end, line_top_y_end, mDensity * 4, mPaintIndicatorLineTop);
         } else {
-            canvas.drawCircle(line_top_x_end, line_top_y_end, mDensity * 3, mPaintIndicatorLineTop);
+            canvas.drawCircle(line_top_x_end, line_top_y_end, mDensity * 2, mPaintIndicatorLineTop);
         }
 
         //绘制游标标题
@@ -455,20 +484,75 @@ public class ChartView extends View {
             //画横线 ,左边预留getCloumn/2个网格
             int len = 16;
             len = chartViewConfig.getCloumn() * 2 + chartViewConfig.getListHorizontalKedu().size() - 1;
-            for (int i = 0; i < chartViewConfig.getRow(); i++) {
-                float startX = -chartViewConfig.getItem_width() * (chartViewConfig.getCloumn() / 2);
-                float startY = i * chartViewConfig.getItem_height();
-                float stopX = (len - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();//(chartViewConfig.getListHorizontalKeduValue().size() +chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
-                float stopY = i * chartViewConfig.getItem_height();
-                canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+            if(chartViewConfig.isShowGridHorizontalLine()){
+                //虚线
+                if(chartViewConfig.isGridLinePathEffect()){
+                    if(mPathGridHorizontal==null){
+                        PathEffect  effects = new DashPathEffect(new float[]{5,5,5,5},1);
+                        mPaintGrid.setAntiAlias(true);
+                        mPaintGrid.setStyle(Paint.Style.STROKE);
+                        mPaintGrid.setPathEffect(effects);
+                        mPathGridHorizontal = new Path[chartViewConfig.getRow()];
+                        for (int i = 0; i < chartViewConfig.getRow(); i++) {
+                            float startX = -chartViewConfig.getItem_width() * (chartViewConfig.getCloumn() / 2);
+                            float startY = i * chartViewConfig.getItem_height();
+                            float stopX = (len - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();//(chartViewConfig.getListHorizontalKeduValue().size() +chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
+                            float stopY = i * chartViewConfig.getItem_height();
+                            Path path = new Path();
+                            path.moveTo(startX, startY);
+                            path.lineTo(stopX, stopY);
+                            mPathGridHorizontal[i]=path;
+                            //canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+                        }
+                    }
+                    for (int i = 0; i < chartViewConfig.getRow(); i++) {
+                        canvas.drawPath(mPathGridHorizontal[i],mPaintGrid);
+                    }
+                 //实线
+                }else{
+                    for (int i = 0; i < chartViewConfig.getRow(); i++) {
+                        float startX = -chartViewConfig.getItem_width() * (chartViewConfig.getCloumn() / 2);
+                        float startY = i * chartViewConfig.getItem_height();
+                        float stopX = (len - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();//(chartViewConfig.getListHorizontalKeduValue().size() +chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
+                        float stopY = i * chartViewConfig.getItem_height();
+                        canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+                    }
+                }
             }
             //画竖线
-            for (int i = 0; i < len + 1; i++) {
-                float startX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
-                float startY = 0;
-                float stopX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
-                float stopY = chartViewConfig.getRow() * chartViewConfig.getItem_height();
-                canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+            if(chartViewConfig.isShowGridVericalLine()){
+                //虚线
+                if(chartViewConfig.isGridLinePathEffect()){
+                    if(mPathGridVerical==null){
+                        PathEffect  effects = new DashPathEffect(new float[]{5,5,5,5},1);
+                        mPaintGrid.setAntiAlias(true);
+                        mPaintGrid.setStyle(Paint.Style.STROKE);
+                        mPaintGrid.setPathEffect(effects);
+                        mPathGridVerical = new Path[len];
+                        for (int i = 0; i < len+1; i++) {
+                            float startX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                            float startY = 0;
+                            float stopX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                            float stopY = chartViewConfig.getRow() * chartViewConfig.getItem_height();Path path = new Path();
+                            path.moveTo(startX, startY);
+                            path.lineTo(stopX, stopY);
+                            mPathGridVerical[i]=path;
+                            //canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+                        }
+                    }
+                    for (int i = 0; i < len + 1; i++) {
+                        canvas.drawPath(mPathGridVerical[i],mPaintGrid);
+                    }
+                //实线
+                }else{
+                    for (int i = 0; i < len + 1; i++) {
+                        float startX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                        float startY = 0;
+                        float stopX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                        float stopY = chartViewConfig.getRow() * chartViewConfig.getItem_height();
+                        canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+                    }
+                }
             }
         }
     }
@@ -482,9 +566,15 @@ public class ChartView extends View {
     protected void drawVericalUnit(Canvas canvas) {
 
         //画lable line 竖线
-        int bottomY = chartViewConfig.getRow() * chartViewConfig.getItem_height();
-        float x_ = getScrollX() + chartViewConfig.getVerical_kedu_leftmargin();
-        canvas.drawLine(x_, 0, x_, bottomY, mPaintGrid);
+        if(chartViewConfig.isVerical_line_show()){
+
+            if (chartViewConfig.getGrid_line_kedu_color() > 0)
+                mPaintVericalKedu.setColor(getResources().getColor(chartViewConfig.getGrid_line_kedu_color()));
+            mPaintVericalKedu.setStrokeWidth(mDensity);
+            int bottomY = chartViewConfig.getRow() * chartViewConfig.getItem_height();
+            float x_ = getScrollX() + chartViewConfig.getVerical_kedu_leftmargin();
+            canvas.drawLine(x_, 0, x_, bottomY, mPaintVericalKedu);
+        }
 
         //每五个格子为一个大刻度
         int levelCount = 5;
@@ -568,7 +658,7 @@ public class ChartView extends View {
                     float stopX = startX+15;
                     float startY =(chartViewConfig.getRow() - i) * chartViewConfig.getItem_height();
                     float stopY = (chartViewConfig.getRow() - i) * chartViewConfig.getItem_height();
-                    canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+                    canvas.drawLine(startX, startY, stopX, stopY, mPaintVericalKedu);
                 }
 
             }
@@ -618,13 +708,13 @@ public class ChartView extends View {
             }
         }
 
-
         if (chartViewConfig.getGrid_line_kedu_color() > 0)
-            mPaintGrid.setColor(getResources().getColor(chartViewConfig.getGrid_line_kedu_color()));
-        mPaintGrid.setStrokeWidth(mDensity * 0.8f);
+            mPaintHorizontalKedu.setColor(getResources().getColor(chartViewConfig.getGrid_line_kedu_color()));
+        mPaintHorizontalKedu.setStrokeWidth(mDensity);
         bottomY = chartViewConfig.getRow() * chartViewConfig.getItem_height();
         //画lable line 横线
-        canvas.drawLine(getScrollX(), bottomY, getScrollX() + getWidth(), bottomY, mPaintGrid);
+        canvas.drawLine(getScrollX(), bottomY, getScrollX() + getWidth(), bottomY, mPaintHorizontalKedu);
+
 
     }
 
@@ -642,6 +732,7 @@ public class ChartView extends View {
                 mPathSet = new Path[size];
                 for (int i = 0; i < size; i++) {
                     Path mPathTrends = new Path();
+
                     //构造控制点的四个点；
                     PointValue l = null;
                     PointValue a = chartViewConfig.getListPoint().get(i);
@@ -699,16 +790,44 @@ public class ChartView extends View {
         }
         int indicator_x = getWidth() / 2 + getScrollX();
         Log.d(TAG, "----indicator_x:" + indicator_x);
-        for (int i = 0; i < chartViewConfig.getListPoint().size(); i++) {
-            PointValue point = chartViewConfig.getListPoint().get(i);
-            if (point.x >= (mScreenIndex - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() && point.x <= (mScreenIndex + chartViewConfig.getCloumn() * 2) * chartViewConfig.getItem_width()) {
-                //画线
-                canvas.drawPath(mPathSet[i], mPaintPath);
-                //画点
-                if(indicator_x+5>=point.x && indicator_x-5<=point.x){
-                    canvas.drawCircle(point.x, point.y, mDensity * 5f, mPaintCircle);
-                }else{
-                    canvas.drawCircle(point.x, point.y, mDensity * 4f, mPaintCircle);
+        //点是空心的，含有内外圆的
+        if(chartViewConfig.isPointCircleStoke()){
+            mPaintCircle.setStyle(Paint.Style.STROKE);
+            //画线
+            for (int i = 0; i < chartViewConfig.getListPoint().size(); i++) {
+                PointValue point = chartViewConfig.getListPoint().get(i);
+                if (point.x >= (mScreenIndex - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() && point.x <= (mScreenIndex + chartViewConfig.getCloumn() * 2) * chartViewConfig.getItem_width()) {
+                    canvas.drawPath(mPathSet[i], mPaintPath);
+                }
+            }
+            //画圆
+            for (int i = 0; i < chartViewConfig.getListPoint().size(); i++) {
+                PointValue point = chartViewConfig.getListPoint().get(i);
+                if (point.x >= (mScreenIndex - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() && point.x <= (mScreenIndex + chartViewConfig.getCloumn() * 2) * chartViewConfig.getItem_width()) {
+                    //画大圆
+                    canvas.drawCircle(point.x, point.y, mDensity * 7f, mPaintCircleOutSide);
+                    //画点
+                    if(indicator_x+5>=point.x && indicator_x-5<=point.x){
+                        canvas.drawCircle(point.x, point.y, mDensity * 4f, mPaintCircle);
+                    }else{
+                        canvas.drawCircle(point.x, point.y, mDensity * 4f, mPaintCircle);
+                    }
+                }
+            }
+        }else{
+            mPaintCircle.setStyle(Paint.Style.FILL);
+            //画线
+            for (int i = 0; i < chartViewConfig.getListPoint().size(); i++) {
+                PointValue point = chartViewConfig.getListPoint().get(i);
+                if (point.x >= (mScreenIndex - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() && point.x <= (mScreenIndex + chartViewConfig.getCloumn() * 2) * chartViewConfig.getItem_width()) {
+                    //画线
+                    canvas.drawPath(mPathSet[i], mPaintPath);
+                    //画点
+                    if(indicator_x+5>=point.x && indicator_x-5<=point.x){
+                         canvas.drawCircle(point.x, point.y, mDensity * 5f, mPaintCircle);
+                    }else{
+                        canvas.drawCircle(point.x, point.y, mDensity * 4f, mPaintCircle);
+                    }
                 }
             }
         }

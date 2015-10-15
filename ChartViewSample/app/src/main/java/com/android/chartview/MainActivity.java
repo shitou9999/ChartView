@@ -123,11 +123,17 @@ public class MainActivity extends Activity {
                 //设置每一个格子的宽度
                 .setItem_width(mScreenWidth / 4)
                 //设置格子线的颜色
-                .setGrid_line_color(R.color.rcharview_grid_line_color)
+                .setGrid_line_color(R.color.xiyou_blue)
                 //设置横竖刻度线的颜色
-                .setGrid_line_kedu_color(R.color.xiyou_white)
+                .setGrid_line_kedu_color(R.color.xiyou_blue)
                 //设置是否显示格子线，PS:即使不显示格子线，以上的参数还是必须设置
-                .setIsShowGridLine(false)
+                .setIsShowGridLine(true)
+                //横向网格显示
+                .setIsShowGridHorizontalLine(true)
+                //竖向网格不显示
+                .setIsShowGridVericalLine(false)
+                //网格空心
+                .setIsGridLinePathEffect(true)
 
                         //设置竖向刻度左边距
                 .setVerical_kedu_leftmargin(mScreenWidth / 8)
@@ -144,16 +150,18 @@ public class MainActivity extends Activity {
                         //竖向刻度是否分段
                 .setVerical_need_to_fragment(false)
                         //竖向刻度值颜色
-                .setVerical_unit_color(R.color.xiyou_white)
+                .setVerical_unit_color(R.color.xiyou_gray)
                         //竖向刻度 文案 颜色
-                .setVerical_unit_lable_color(R.color.xiyou_white)
+                .setVerical_unit_lable_color(R.color.xiyou_gray)
                         //竖向刻度 文案 颜色
-                .setVerical_unit_lable_sub_color(R.color.xiyou_white)
+                .setVerical_unit_lable_sub_color(R.color.xiyou_gray)
                         //竖向刻度 凸出线是否显示
-                .setVerical_kedu_line_show(true)
+                .setVerical_kedu_line_show(false)
+                        //竖向刻度线 不显示
+                .setVerical_line_show(false)
 
                         //设置水平刻度
-                .setListHorizontalKeduAndValueType(listHorizontal, 0,"1")
+                .setListHorizontalKeduAndValueType(listHorizontal, 0, "1")
                         //设置贝塞尔区域
                 .setListPointRegion(listPointRegion)
                         //设置区域颜色
@@ -161,33 +169,37 @@ public class MainActivity extends Activity {
                         //设置点的内容
                 .setListPoint(listPoint)
                         //是否平滑过渡，即贝塞尔曲线过度
-                .setIsSmoothPoint(true)
+                //.setIsSmoothPoint(true)
                         //是否点线闭合,闭合则需要设置闭合区域颜色
-                .setIsFillPointRegion(true)
+                //.setIsFillPointRegion(true)
                         //点线闭合区域颜色
-                .setRegion_connect_color(R.color.xiyou_white)
+                //.setRegion_connect_color(R.color.xiyou_white)
 
                         //设置点和线的颜色
-                .setPath_line_color(R.color.xiyou_white)
-                    //保留
-                .setPoint_circle_color_interval(R.color.xiyou_white)
-                    //保留
+                .setPath_line_color(R.color.xiyou_pink)
+                        //保留
+                .setPoint_circle_color_interval(R.color.xiyou_pink)
+                        //保留
                 .setPoint_circle_color_outside(R.color.xiyou_white)
+                        //点的圆圈是否空心
+                .setIsPointCircleStoke(true)
 
                         //游标的单位文本
                 .setIndicator_title_unit("kg")
-                       //游标颜色
-                .setIndicator_color(R.color.xiyou_white)
-                       //游标标题颜色
-                .setIndicator_title_color(R.color.xiyou_blue)
-                       //游标是否跟着曲线一起上下移动
-                .setIsIndicatorMoveWithPoint(true)
+                        //游标颜色
+                .setIndicator_color(R.color.xiyou_red)
+                        //游标外圈颜色
+                        .setIndicator_outside_circle_color(R.color.xiyou_orange)
+                        //游标标题颜色
+                .setIndicator_title_color(R.color.xiyou_white)
+                        //游标是否跟着曲线一起上下移动
+                //.setIsIndicatorMoveWithPoint(true)
                        //自定义游标背景
-                .setIndicatorBgRes(R.drawable.tree50)
+                //.setIndicatorBgRes(R.drawable.tree50)
                       //设置游标半径，默认游标是圆形的
                 .setIndicator_radius(100)
 
-                    //默认选中位置
+                        //默认选中位置
                 .setItemSelection(1)
         ;
         chartview.init(config);

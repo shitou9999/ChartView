@@ -30,6 +30,12 @@ public class ChartViewConfig {
     private int grid_line_kedu_color;
     //是否显示网格的线
     private boolean isShowGridLine =true;
+    //是否显示网格竖线
+    private boolean isShowGridVericalLine=true;
+    //是否显示网格横线
+    private boolean isShowGridHorizontalLine = true;
+    //是否使网格虚线
+    private boolean isGridLinePathEffect = false;
 
     //竖向 单位开始值
     private float verical_unit_start;
@@ -49,6 +55,8 @@ public class ChartViewConfig {
     private int verical_kedu_leftmargin;
     //竖向刻度是否显示线
     private boolean verical_kedu_line_show=false;
+    //竖向刻度线是否显示
+    private boolean verical_line_show =true;
 
     //竖向文本使用类型
     public boolean verical_lable_use_integer = true;
@@ -81,9 +89,14 @@ public class ChartViewConfig {
     private int point_circle_color_interval = 0;
     //点的外圆颜色
     private int point_circle_color_outside = 0;
+    //点的圆圈是否空心
+    private boolean isPointCircleStoke=true;
+
 
     //游标颜色
     private int indicator_color = 0;
+    //游标外部圆圈的 颜色
+    private int indicator_outside_circle_color=0;
     //游标标题颜色
     private int indicator_title_color = 0;
     //游标标题单位
@@ -104,6 +117,16 @@ public class ChartViewConfig {
     private int region_color;
     //选中项
     private int item_selection;
+
+
+    public boolean isPointCircleStoke() {
+        return isPointCircleStoke;
+    }
+
+    public ChartViewConfig setIsPointCircleStoke(boolean isPointCircleStoke) {
+        this.isPointCircleStoke = isPointCircleStoke;
+        return this;
+    }
 
     public int getItemSelection() {
         return item_selection;
@@ -165,6 +188,15 @@ public class ChartViewConfig {
         return this;
     }
 
+    public boolean isVerical_line_show() {
+        return verical_line_show;
+    }
+
+    public ChartViewConfig setVerical_line_show(boolean verical_line_show) {
+        this.verical_line_show = verical_line_show;
+        return this;
+    }
+
     public int getIndicator_radius() {
         return indicator_radius;
     }
@@ -198,6 +230,15 @@ public class ChartViewConfig {
 
     public ChartViewConfig setIsIndicatorMoveWithPoint(boolean isIndicatorMoveWithPoint) {
         this.isIndicatorMoveWithPoint = isIndicatorMoveWithPoint;
+        return this;
+    }
+
+    public int getIndicator_outside_circle_color() {
+        return indicator_outside_circle_color;
+    }
+
+    public ChartViewConfig setIndicator_outside_circle_color(int indicator_outside_circle_color) {
+        this.indicator_outside_circle_color = indicator_outside_circle_color;
         return this;
     }
 
@@ -482,6 +523,33 @@ public class ChartViewConfig {
 
     public ChartViewConfig setGrid_line_color(int grid_line_color) {
         this.grid_line_color = grid_line_color;
+        return this;
+    }
+
+    public boolean isShowGridVericalLine() {
+        return isShowGridVericalLine;
+    }
+
+    public ChartViewConfig setIsShowGridVericalLine(boolean isShowGridVericalLine) {
+        this.isShowGridVericalLine = isShowGridVericalLine;
+        return this;
+    }
+
+    public boolean isShowGridHorizontalLine() {
+        return isShowGridHorizontalLine;
+    }
+
+    public ChartViewConfig setIsShowGridHorizontalLine(boolean isShowGridHorizontalLine) {
+        this.isShowGridHorizontalLine = isShowGridHorizontalLine;
+        return this;
+    }
+
+    public boolean isGridLinePathEffect() {
+        return isGridLinePathEffect;
+    }
+
+    public ChartViewConfig setIsGridLinePathEffect(boolean isGridLinePathEffect) {
+        this.isGridLinePathEffect = isGridLinePathEffect;
         return this;
     }
 
