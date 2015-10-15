@@ -69,6 +69,8 @@ public class ChartViewConfig {
     //水平刻度值类型
     public boolean horizontal_lable_use_integer = false;
     public boolean horizontal_lable_use_float = false;
+    //水平刻度线是否显示
+    private boolean horizontal_kedu_line_show=true;
     //public boolean horizontal_lable_use_calendar = false;
     //水平刻度间隔值
     public long horizontal_kedu_interval[];
@@ -311,6 +313,15 @@ public class ChartViewConfig {
 
     public ChartViewConfig setHorizontal_simpleDateFormat(SimpleDateFormat horizontal_simpleDateFormat) {
         this.horizontal_simpleDateFormat = horizontal_simpleDateFormat;
+        return this;
+    }
+
+    public boolean isHorizontal_kedu_line_show() {
+        return horizontal_kedu_line_show;
+    }
+
+    public ChartViewConfig setHorizontal_kedu_line_show(boolean horizontal_kedu_line_show) {
+        this.horizontal_kedu_line_show = horizontal_kedu_line_show;
         return this;
     }
 

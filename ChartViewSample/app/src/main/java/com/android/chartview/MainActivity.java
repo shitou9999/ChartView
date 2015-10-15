@@ -162,6 +162,7 @@ public class MainActivity extends Activity {
 
                         //设置水平刻度
                 .setListHorizontalKeduAndValueType(listHorizontal, 0, "1")
+                .setHorizontal_kedu_line_show(true)
                         //设置贝塞尔区域
                 .setListPointRegion(listPointRegion)
                         //设置区域颜色

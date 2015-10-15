@@ -685,7 +685,8 @@ public class ChartView extends View {
         //格子数目
         final int count = chartViewConfig.getListHorizontalKedu().size();
         //文案y轴底部
-        int bottomY = chartViewConfig.getRow() * chartViewConfig.getItem_height() + 40;
+        int bottomY_y =  chartViewConfig.getRow() * chartViewConfig.getItem_height();
+        int bottomY = bottomY_y + 40;
         for (int i = 0; i < count; i++) {
             if (i >= mScreenIndex - chartViewConfig.getCloumn() / 2 && i <= mScreenIndex + chartViewConfig.getCloumn()) {
                 KeduValue model = chartViewConfig.getListHorizontalKedu().get(i);
@@ -693,10 +694,15 @@ public class ChartView extends View {
                 if (!TextUtils.isEmpty(unit_text)) {
                     Rect rect = new Rect();
                     mPaintHorizontalLable.getTextBounds(unit_text, 0, unit_text.length(), rect);
-                    float x = (i + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() - rect.width() / 2;//- getScrollX();
+                    float kedu_x = (i + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                    float x = kedu_x- rect.width() / 2;//- getScrollX();
                     model.current_x = x + rect.width() / 2;
                     Log.d(TAG, "-->mScreenIndex:" + mScreenIndex + "-->i:" + i + "-->x:" + x + "-->getScrollX():" + getScrollX());
                     canvas.drawText(unit_text, x, bottomY, mPaintHorizontalLable);
+                    //显示水平刻度线
+                    if(chartViewConfig.isHorizontal_kedu_line_show()){
+                        canvas.drawLine(kedu_x, bottomY_y, kedu_x, bottomY_y-10, mPaintHorizontalKedu);
+                    }
                 }
                 unit_text = model.value_unit;
                 if (!TextUtils.isEmpty(unit_text)) {
