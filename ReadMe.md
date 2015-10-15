@@ -103,6 +103,7 @@ ChartView是一个extends view的自定义图标控件
 
 ![](http://7xnby9.com1.z0.glb.clouddn.com/sample1.png)	
 ![](http://7xnby9.com1.z0.glb.clouddn.com/sample3.png)	
+![](http://7xnby9.com1.z0.glb.clouddn.com/sample4.png)	
 ----------
 
 
