@@ -6,10 +6,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.android.chartview.util.Helper;
 import com.meetyou.chartview.ChartView;
 import com.meetyou.chartview.ChartViewConfig;
 import com.meetyou.chartview.KeduValue;
 import com.meetyou.chartview.PointValue;
+import com.meetyou.roundprogressview.RoundProgressConfig;
+import com.meetyou.roundprogressview.RoundProgressView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +21,44 @@ public class MainActivity extends Activity {
 
     private static final String TAG ="MainActivity" ;
     private ChartView chartview;
+    private RoundProgressView roundProgressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initProgressView();
+        initChartView();
+    }
+
+    private void initProgressView(){
+
+        roundProgressView = (RoundProgressView)findViewById(R.id.roundProgressView);
+        RoundProgressConfig roundProgressConfig = new RoundProgressConfig();
+        roundProgressConfig
+                .setRadius(Helper.dip2px(getApplicationContext(),50))
+                .setCircleBgColor(R.color.rcharview_cover_range_blue)
+                .setCircleInsideColor(R.color.xiyou_white)
+                .setEndColor(R.color.xiyou_pink)
+                .setStartColor(R.color.xiyou_white)
+                .setMaxProgress(100)
+                .setMinProgress(0)
+                .setTextSize(24)
+                .setTextUnitSize(16)
+                .setUnitText("分")
+                .setProgressBarWidth(Helper.dip2px(getApplicationContext(), 18))
+                .setTextColor(R.color.xiyou_pink)
+                .setTextUnitColor(R.color.xiyou_pink);
+        roundProgressView.init(roundProgressConfig);
+        roundProgressView.setProgress(100, true);
+        //roundProgressView.setProgress(90);
+    }
+
+
+    private void initChartView(){
         chartview = (ChartView)findViewById(R.id.chartview);
-
         int mScreenWidth = getResources().getDisplayMetrics().widthPixels;
-
         //构造横刻度
         List<KeduValue> listHorizontal =getHorizontalKedu();
 
@@ -38,7 +70,6 @@ public class MainActivity extends Activity {
 
         config(mScreenWidth,listHorizontal,listPoint,listRegion);
     }
-
     /**
      * 构造横刻度
      * @return
