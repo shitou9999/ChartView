@@ -312,6 +312,8 @@ public class ChartView extends View {
      * @param canvas
      */
     protected void drawIndicator(Canvas canvas) {
+        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
+            return;
         if(!chartViewConfig.isShowIndicator())
             return;
         //indicator坐标
@@ -320,7 +322,7 @@ public class ChartView extends View {
         //游标默认y轴位置
         int indicator_y =chartViewConfig.getIndicator_radius() * 3 / 2;
         //游标半径
-        //------ 计算上部分连线的Y方式的结束值
+        //------计算上部分连线的Y方式的结束值
         int radius=50;
         if(chartViewConfig.getIndicatorBgRes()>0) {
             if (mBitmapIndicator == null) {
@@ -686,19 +688,19 @@ public class ChartView extends View {
         for (int i = 0; i < count; i++) {
             if (i >= mScreenIndex - chartViewConfig.getCloumn() / 2 && i <= mScreenIndex + chartViewConfig.getCloumn()) {
                 KeduValue model = chartViewConfig.getListHorizontalKedu().get(i);
-                unit_text = TextUtils.isEmpty(model.display_value) ? model.value : model.display_value;
+                unit_text = model.display_value;
+                float kedu_x = (i + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
                 if (!TextUtils.isEmpty(unit_text)) {
                     Rect rect = new Rect();
                     mPaintHorizontalLable.getTextBounds(unit_text, 0, unit_text.length(), rect);
-                    float kedu_x = (i + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
                     float x = kedu_x- rect.width() / 2;//- getScrollX();
                     model.current_x = x + rect.width() / 2;
                     Log.d(TAG, "-->mScreenIndex:" + mScreenIndex + "-->i:" + i + "-->x:" + x + "-->getScrollX():" + getScrollX());
                     canvas.drawText(unit_text, x, bottomY, mPaintHorizontalLable);
-                    //显示水平刻度线
-                    if(chartViewConfig.isHorizontal_kedu_line_show()){
-                        canvas.drawLine(kedu_x, bottomY_y, kedu_x, bottomY_y-10, mPaintHorizontalKedu);
-                    }
+                }
+                //显示水平刻度线
+                if (chartViewConfig.isHorizontal_kedu_line_show()) {
+                    canvas.drawLine(kedu_x, bottomY_y, kedu_x, bottomY_y-10, mPaintHorizontalKedu);
                 }
                 unit_text = model.value_unit;
                 if (!TextUtils.isEmpty(unit_text)) {
@@ -726,7 +728,8 @@ public class ChartView extends View {
      * @param canvas
      */
     protected void drawPointAndPath(Canvas canvas) {
-
+        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
+            return;
         if(chartViewConfig.getListPoint().size()>=4 && chartViewConfig.isSmoothPoint()){
             if (mPathSet == null) {
                 int size = chartViewConfig.getListPoint().size();
@@ -1054,6 +1057,9 @@ public class ChartView extends View {
     }
 
     private void caculatePointRegionValue(List<PointValue> listPoint) {
+        if(listPoint==null || listPoint.size()==0)
+            return;
+
         //计算可见点的X轴坐标
      /*   List<KeduValue> listHorizontalKedu = new ArrayList<>();
         final int count_horizontal = chartViewConfig.getListHorizontalKedu().size();
@@ -1185,6 +1191,8 @@ public class ChartView extends View {
     private boolean isFirst = true;
 
     private void setSelection() {
+        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
+            return;
         if (isFirst) {
             isFirst = false;
             int selection = chartViewConfig.getItemSelection();
@@ -1457,6 +1465,8 @@ public class ChartView extends View {
         //int mGridWidth = chartViewConfig.getItem_width();
         //minX =0;
         //maxX = (chartViewConfig.getListHorizontalKedu().size() - 1) * mGridWidth;
+        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
+            return;
         minX = (int) chartViewConfig.getListPoint().get(0).x - chartViewConfig.getCloumn() * chartViewConfig.getItem_width() / 2;
         maxX = (int) chartViewConfig.getListPoint().get(chartViewConfig.getListPoint().size() - 1).x - chartViewConfig.getCloumn() * chartViewConfig.getItem_width() / 2;
         Log.d(TAG, "--getMinAndManScrollerValue minX:" + minX + "--maxX:" + maxX);

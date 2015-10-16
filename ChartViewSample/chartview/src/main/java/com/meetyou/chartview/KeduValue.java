@@ -10,7 +10,7 @@ public class KeduValue {
     //具体值
     public String value;
     //显示的值
-    public String display_value;
+    public String display_value="";
     //日期类型使用
     public Calendar calendar;
     //预留字段，如果有就绘制在第二行
