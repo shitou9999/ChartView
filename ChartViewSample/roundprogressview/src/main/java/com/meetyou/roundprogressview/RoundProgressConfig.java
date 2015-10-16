@@ -5,7 +5,7 @@ package com.meetyou.roundprogressview;
  */
 public class RoundProgressConfig {
     //半径
-    private int Radius;
+    //private int Radius;
     //渐变开始颜色
     private int StartColor;
     //渐变结束颜色
@@ -56,14 +56,14 @@ public class RoundProgressConfig {
         return this;
     }
 
-    public int getRadius() {
+   /* public int getRadius() {
         return Radius;
     }
 
     public RoundProgressConfig setRadius(int radius) {
         Radius = radius;
         return this;
-    }
+    }*/
 
 
 

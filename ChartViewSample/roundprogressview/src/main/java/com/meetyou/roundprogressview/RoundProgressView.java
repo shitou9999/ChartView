@@ -63,6 +63,9 @@ public class RoundProgressView extends View {
         mContext = context;
     }
 
+    private int getRadius(){
+        return getWidth()/2;
+    }
 
     public void init(RoundProgressConfig config){
         roundProgressConfig = config;
@@ -111,7 +114,7 @@ public class RoundProgressView extends View {
 
          //起始偏移角度
          int a = roundProgressConfig.getProgressBarWidth()/2;
-         int b = roundProgressConfig.getRadius()-a;
+         int b = getRadius()-a;
          double hudu = Math.atan2(a,b);
          double jiaodu = hudu*180/Math.PI;
          mSweepStartAngle = 270+jiaodu;
@@ -120,7 +123,7 @@ public class RoundProgressView extends View {
                  getResources().getColor(roundProgressConfig.getEndColor()),},null);
 
         /* mShader = new RadialGradient(getWidth()/2,getHeight()/2,
-                roundProgressConfig.getRadius(),getResources().getColor(roundProgressConfig.getStartColor()),
+                getRadius()(),getResources().getColor(roundProgressConfig.getStartColor()),
                 getResources().getColor(roundProgressConfig.getEndColor()), Shader.TileMode.MIRROR);*/
         /*mShader = new LinearGradient(left, top, right, bottom,
                 new int[] { Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.LTGRAY*//*roundProgressConfig.getStartColor(),roundProgressConfig.getEndColor() *//*}, null, Shader.TileMode.REPEAT); // 一个材质,打造出一个线性梯度沿著一条线。
@@ -183,7 +186,7 @@ public class RoundProgressView extends View {
         //外圆
         float x = getWidth()/2;
         float y = getHeight()/2;
-        int radus = roundProgressConfig.getRadius();
+        int radus = getRadius();
         canvas.drawCircle(x, y, radus, mPaintCircleOutside);
 
         //内圆
@@ -212,10 +215,10 @@ public class RoundProgressView extends View {
         }
         //渐变圆
         int widthBolder = roundProgressConfig.getProgressBarWidth();
-        int left = getWidth()/2-roundProgressConfig.getRadius()+widthBolder/2;
-        int top = getHeight()/2-roundProgressConfig.getRadius()+widthBolder/2;
-        int right = getWidth()/2+roundProgressConfig.getRadius()-widthBolder/2;
-        int bottom = getHeight()/2+roundProgressConfig.getRadius()-widthBolder/2;
+        int left = getWidth()/2-getRadius()+widthBolder/2;
+        int top = getHeight()/2-getRadius()+widthBolder/2;
+        int right = getWidth()/2+getRadius()-widthBolder/2;
+        int bottom = getHeight()/2+getRadius()-widthBolder/2;
         RectF rectF = new RectF(left,top,right,bottom);
         mShader = new SweepGradient(getWidth()/2,getHeight()/2,new int[]{  getResources().getColor(roundProgressConfig.getStartColor()),
                 getResources().getColor(roundProgressConfig.getEndColor()),},null);

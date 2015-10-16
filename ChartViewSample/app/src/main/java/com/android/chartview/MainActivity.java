@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
         roundProgressView = (RoundProgressView)findViewById(R.id.roundProgressView);
         RoundProgressConfig roundProgressConfig = new RoundProgressConfig();
         roundProgressConfig
-                .setRadius(Helper.dip2px(getApplicationContext(),50))
+                //.setRadius(Helper.dip2px(getApplicationContext(),50))
                 .setCircleBgColor(R.color.rcharview_cover_range_blue)
                 .setCircleInsideColor(R.color.xiyou_white)
                 .setEndColor(R.color.xiyou_pink)
