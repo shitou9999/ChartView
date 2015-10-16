@@ -8,17 +8,13 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimationDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Scroller;
 
 import java.util.ArrayList;
@@ -331,7 +327,7 @@ public class ChartView extends View {
                 mBitmapIndicator = BitmapFactory.decodeResource(getResources(), chartViewConfig.getIndicatorBgRes());
             }
             if(mBitmapIndicator!=null)
-                 radius = mBitmapIndicator.getWidth()/2;
+                radius = mBitmapIndicator.getWidth()/2;
         }else{
             radius = chartViewConfig.getIndicator_radius();
         }
@@ -351,7 +347,7 @@ public class ChartView extends View {
             Log.d(TAG,"-->i:"+i+"--point x:"+chartViewConfig.getListPoint().get(i).x+"-->indicator_x:"+indicator_x);
             float x = chartViewConfig.getListPoint().get(i).x;
             if (indicator_x+5 >=(int)x) {
-                 index = i;
+                index = i;
                 break;
             }
             if (indicator_x+5 == (int)x) {
@@ -408,7 +404,7 @@ public class ChartView extends View {
                     canvas.drawBitmap(mBitmapIndicator,left,top,mPaintIndicator);
                 }
             }
-         //默认游标，圆形
+            //默认游标，圆形
         }else{
             //外圆
             if(chartViewConfig.getIndicator_outside_circle_color()>0){
@@ -508,7 +504,7 @@ public class ChartView extends View {
                     for (int i = 0; i < chartViewConfig.getRow(); i++) {
                         canvas.drawPath(mPathGridHorizontal[i],mPaintGrid);
                     }
-                 //实线
+                    //实线
                 }else{
                     for (int i = 0; i < chartViewConfig.getRow(); i++) {
                         float startX = -chartViewConfig.getItem_width() * (chartViewConfig.getCloumn() / 2);
@@ -543,7 +539,7 @@ public class ChartView extends View {
                     for (int i = 0; i < len + 1; i++) {
                         canvas.drawPath(mPathGridVerical[i],mPaintGrid);
                     }
-                //实线
+                    //实线
                 }else{
                     for (int i = 0; i < len + 1; i++) {
                         float startX = (i - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
@@ -746,7 +742,7 @@ public class ChartView extends View {
                     int nextNextIndex = i+2<=size-1?i+2:size-1;
                     PointValue b = chartViewConfig.getListPoint().get(nextIndex);
                     PointValue n = chartViewConfig.getListPoint().get(nextNextIndex);
-                   //超过限制，break;
+                    //超过限制，break;
                     if(i+1>size-1){
                         mPathSet[i]=mPathTrends;
                         break;
@@ -830,7 +826,7 @@ public class ChartView extends View {
                     canvas.drawPath(mPathSet[i], mPaintPath);
                     //画点
                     if(indicator_x+5>=point.x && indicator_x-5<=point.x){
-                         canvas.drawCircle(point.x, point.y, mDensity * 5f, mPaintCircle);
+                        canvas.drawCircle(point.x, point.y, mDensity * 5f, mPaintCircle);
                     }else{
                         canvas.drawCircle(point.x, point.y, mDensity * 4f, mPaintCircle);
                     }
@@ -1069,81 +1065,77 @@ public class ChartView extends View {
             }
         }*/
         //遍历在这个刻度范围内的点，计算出x值
-         KeduValue firstKeduValue = chartViewConfig.getListHorizontalKedu().get(0);
-         for (PointValue point : listPoint) {
-             if (chartViewConfig.horizontal_lable_use_integer) {
-                 //当前点的横刻度值
-                 int horizontal_value = Integer.valueOf(String.valueOf(point.horizontal_value));
-                 //找出当前点在第几个横刻度（非精确，因为是画区域），取余数
-                 int horizontalKeduIndex = (horizontal_value-Integer.valueOf(firstKeduValue.value))/(int)chartViewConfig.horizontal_kedu_interval[0];
-                 //该横刻度的值
-                 int horizontalKeduIndex_value = horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
-                 //该横刻度的x值
-                 int horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
 
-                 //计算出当前点与当前横刻度的差
-                 int value = horizontal_value - horizontalKeduIndex_value;
-                 //计算差值占用间隔的百分比
-                 float percent = value / (chartViewConfig.horizontal_kedu_interval[0] * 1.0f);
-                 //通过百分比和横刻度的x值算出当前点的x值
-                 point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
-
-             }else if (chartViewConfig.horizontal_lable_use_float) {
-
-                 //当前点的横刻度值
-                 float horizontal_value = Float.valueOf(String.valueOf(point.horizontal_value));
-                 //找出当前点在第几个横刻度（非精确，因为是画区域），取余数
-                 float horizontalKeduIndex = (horizontal_value-Integer.valueOf(firstKeduValue.value))/(int)chartViewConfig.horizontal_kedu_interval[0];
-                 //该横刻度的值
-                 float horizontalKeduIndex_value = horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
-                 //该横刻度的x值
-                 float horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
-
-                 //计算出当前点与当前横刻度的差
-                 float value = horizontal_value - horizontalKeduIndex_value;
-                 //计算差值占用间隔的百分比
-                 float percent = value / (chartViewConfig.horizontal_kedu_interval[0] * 1.0f);
-                 //通过百分比和横刻度的x值算出当前点的x值
-                 point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
-             }
-       /* for (PointValue point : listPoint) {
-            int horizontal_value = Integer.valueOf(String.valueOf(point.horizontal_value));
-            //Log.d(TAG, "--horizontal_value:" + horizontal_value);
-            //每个点与可见的横刻度降序对比，一旦大于就break;
-            for (int i = listHorizontalKedu.size() - 1; i >= 0; i--) {
-                KeduValue kedu = listHorizontalKedu.get(i);
-                if (chartViewConfig.horizontal_lable_use_integer) {
-                    if (horizontal_value >= Integer.valueOf(String.valueOf(kedu.value))) {
-                        int horizontalKeduIndex = getHorizontalKeduIndex(kedu.value);
-                        if(horizontalKeduIndex>=0 && chartViewConfig.horizontal_kedu_interval[horizontalKeduIndex]!=0){
-                            Integer value = horizontal_value - Integer.valueOf(String.valueOf(kedu.value));
-                            float percent = value / (chartViewConfig.horizontal_kedu_interval[horizontalKeduIndex] * 1.0f);
-                            point.x = kedu.current_x + percent * chartViewConfig.getItem_width();
-                            Log.d(TAG, "point.x:" + point.x + "--kedu.current_x:" + kedu.current_x + "--percent:" + percent + "-->horizontal_kedu_interval:"
-                                    + chartViewConfig.horizontal_kedu_interval[horizontalKeduIndex] + "-->horizontal_value:" + horizontal_value + "-->kedu.value:" + kedu.value+"-->i:"+i);
-                        }else{
-                            point.x = kedu.current_x;
-                        }
-                        break;
-                    }
-                } else if (chartViewConfig.horizontal_lable_use_float) {
-                    //float horizontal_value = Float.valueOf(String.valueOf(point.horizontal_value));
-                    if (horizontal_value >= Float.valueOf(String.valueOf(kedu.value))) {
-                        int horizontalKeduIndex = getHorizontalKeduIndex(kedu.value);
-                        if(horizontalKeduIndex>=0  && chartViewConfig.horizontal_kedu_interval[horizontalKeduIndex]!=0){
-                            Float value = horizontal_value - Float.valueOf(String.valueOf(kedu.value));
-                            float percent = value / (chartViewConfig.horizontal_kedu_interval[horizontalKeduIndex] * 1.0f);
-                            point.x = kedu.current_x + percent * chartViewConfig.getItem_width();
-                            //Log.d(TAG, "point.x:" + point.x + "--kedu.current_x:" + kedu.current_x + "--percent:" + percent + "-->horizontal_kedu_interval:" + chartViewConfig.horizontal_kedu_interval + "-->horizontal_value:" + horizontal_value + "-->kedu.value:" + kedu.value);
-
-                        }else{
-                            point.x = kedu.current_x;
-                        }
-                        break;
-                    }
+        KeduValue firstKeduValue = chartViewConfig.getListHorizontalKedu().get(0);
+        for (PointValue point : listPoint) {
+            if (chartViewConfig.horizontal_lable_use_integer) {
+                //当前点的横刻度值
+                int horizontal_value = Integer.valueOf(String.valueOf(point.horizontal_value));
+                //找出当前点在第几个横刻度
+                int horizontalKeduIndex = (horizontal_value-Integer.valueOf(firstKeduValue.value))/(int)chartViewConfig.horizontal_kedu_interval[0];
+                //该横刻度的值
+                if(horizontalKeduIndex>=0 && horizontalKeduIndex < chartViewConfig.getListHorizontalKedu().size()){
+                    int horizontalKeduIndex_value =Integer.valueOf(chartViewConfig.getListHorizontalKedu().get(horizontalKeduIndex).value);//horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    //该横刻度的x值
+                    int horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                    //计算出当前点与当前横刻度的差
+                    int value = horizontal_value - horizontalKeduIndex_value;
+                    //计算差值占用间隔的百分比
+                    float percent = value / (chartViewConfig.horizontal_kedu_interval[0] * 1.0f);
+                    //通过百分比和横刻度的x值算出当前点的x值
+                    point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
+                    //不在横刻度范围内，则自己计算x值，画区域点的时候才会遇到
+                }else{
+                    int horizontalKeduIndex_value=0;
+                    if(horizontalKeduIndex<0)
+                        horizontalKeduIndex_value =Integer.valueOf(chartViewConfig.getListHorizontalKedu().get(0).value)-horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    else
+                        horizontalKeduIndex_value = horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    //该横刻度的x值
+                    int horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                    //计算出当前点与当前横刻度的差
+                    int value = horizontal_value - horizontalKeduIndex_value;
+                    //计算差值占用间隔的百分比
+                    float percent = value / (chartViewConfig.horizontal_kedu_interval[0] * 1.0f);
+                    //通过百分比和横刻度的x值算出当前点的x值
+                    point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
                 }
-            }*/
 
+            }else if (chartViewConfig.horizontal_lable_use_float) {
+
+                //当前点的横刻度值
+                float horizontal_value = Float.valueOf(String.valueOf(point.horizontal_value));
+                //找出当前点在第几个横刻度（非精确，因为是画区域），取余数
+                int horizontalKeduIndex = (int)(horizontal_value-Integer.valueOf(firstKeduValue.value))/(int)chartViewConfig.horizontal_kedu_interval[0];
+                if(horizontalKeduIndex>=0 && horizontalKeduIndex < chartViewConfig.getListHorizontalKedu().size()){
+                    //该横刻度的值
+                    float horizontalKeduIndex_value =Float.valueOf(chartViewConfig.getListHorizontalKedu().get(horizontalKeduIndex).value);// horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    //该横刻度的x值
+                    float horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+
+                    //计算出当前点与当前横刻度的差
+                    float value = horizontal_value - horizontalKeduIndex_value;
+                    //计算差值占用间隔的百分比
+                    float percent = value / (chartViewConfig.horizontal_kedu_interval[0] * 1.0f);
+                    //通过百分比和横刻度的x值算出当前点的x值
+                    point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
+                    //不在横刻度范围内，则自己计算x值，画区域点的时候才会遇到
+                }else{
+                    float horizontalKeduIndex_value=0;
+                    if(horizontalKeduIndex<0)
+                        horizontalKeduIndex_value =Float.valueOf(chartViewConfig.getListHorizontalKedu().get(0).value)-horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    else
+                        horizontalKeduIndex_value = horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    //该横刻度的x值
+                    int horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
+                    //计算出当前点与当前横刻度的差
+                    float value = horizontal_value - horizontalKeduIndex_value;
+                    //计算差值占用间隔的百分比
+                    float percent = value / (chartViewConfig.horizontal_kedu_interval[0] * 1.0f);
+                    //通过百分比和横刻度的x值算出当前点的x值
+                    point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
+                }
+            }
         }
 
         //遍历在这个刻度范围内的点，计算出y值
@@ -1200,13 +1192,13 @@ public class ChartView extends View {
                 mScroller.setFinalX((int) minX);
             }else{
                 boolean has =false;
-               for(int i=0;i<chartViewConfig.getListPoint().size();i++){
-                   if(selection==i){
-                       mScroller.setFinalX(getScrollX()+(int)chartViewConfig.getListPoint().get(i).x-getWidth()/2);
-                       has =true;
-                       break;
-                   }
-               }
+                for(int i=0;i<chartViewConfig.getListPoint().size();i++){
+                    if(selection==i){
+                        mScroller.setFinalX(getScrollX()+(int)chartViewConfig.getListPoint().get(i).x-getWidth()/2);
+                        has =true;
+                        break;
+                    }
+                }
                 if(!has){
                     mScroller.setFinalX((int) maxX);
                 }
