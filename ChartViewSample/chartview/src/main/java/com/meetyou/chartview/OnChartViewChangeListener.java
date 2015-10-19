@@ -16,4 +16,10 @@ public interface OnChartViewChangeListener {
      * @param scrollDirection
      */
     public void onChartViewScrollDirection(ScrollDirection scrollDirection);
+
+    /**
+     * 滑动到某个点
+     * @param position
+     */
+    public void onItemSelected(int position,Object ject);
 }

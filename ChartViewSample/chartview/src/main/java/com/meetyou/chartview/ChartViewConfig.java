@@ -92,11 +92,11 @@ public class ChartViewConfig {
     //点的外圆颜色
     private int point_circle_color_outside = 0;
     //点的圆圈是否空心
-    private boolean isPointCircleStoke=true;
+    private boolean isPointCircleIntervalStoke=true;
 
 
     //游标颜色
-    private int indicator_color = 0;
+    private int indicator_line_color = 0;
     //游标外部圆圈的 颜色
     private int indicator_outside_circle_color=0;
     //游标标题颜色
@@ -121,12 +121,12 @@ public class ChartViewConfig {
     private int item_selection;
 
 
-    public boolean isPointCircleStoke() {
-        return isPointCircleStoke;
+    public boolean isPointCircleIntervalStoke() {
+        return isPointCircleIntervalStoke;
     }
 
-    public ChartViewConfig setIsPointCircleStoke(boolean isPointCircleStoke) {
-        this.isPointCircleStoke = isPointCircleStoke;
+    public ChartViewConfig setIsPointCircleIntervalStoke(boolean isPointCircleStoke) {
+        this.isPointCircleIntervalStoke = isPointCircleStoke;
         return this;
     }
 
@@ -244,12 +244,12 @@ public class ChartViewConfig {
         return this;
     }
 
-    public int getIndicator_color() {
-        return indicator_color;
+    public int getIndicatorLinecolor() {
+        return indicator_line_color;
     }
 
-    public ChartViewConfig setIndicator_color(int indicator_color) {
-        this.indicator_color = indicator_color;
+    public ChartViewConfig setIndicator_Linecolor(int indicator_color) {
+        this.indicator_line_color = indicator_color;
         return this;
     }
 

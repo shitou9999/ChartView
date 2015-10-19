@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
         chartview = (ChartView)findViewById(R.id.chartview);
         int mScreenWidth = getResources().getDisplayMetrics().widthPixels;
         //构造横刻度
-        List<KeduValue> listHorizontal =getHorizontalKedu();
+        List<KeduValue> listHorizontal = getHorizontalKedu();
 
         //构造绘制点
         List<PointValue> listPoint =getPoint();
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
         List<PointValue> list = new ArrayList<>();
         int temp = 5;
         //正向
-        for(int i=0;i<20;i++){
+        for(int i=-5;i<20;i++){
             PointValue pointValue = new PointValue();
             //横刻度值，必须在横刻度范围内，否则无法显示
             pointValue.horizontal_value = i+"";
@@ -129,7 +129,7 @@ public class MainActivity extends Activity {
             list.add(pointValue);
         }
 
-        for(int i=19;i>=0;i--){
+        for(int i=19;i>=-5;i--){
             PointValue pointValue = new PointValue();
             //横刻度值，必须在横刻度范围内，否则无法显示
             pointValue.horizontal_value = i+"";
@@ -193,11 +193,14 @@ public class MainActivity extends Activity {
 
                         //设置水平刻度
                 .setListHorizontalKeduAndValueType(listHorizontal, 0, "1")
+                        //设置水平刻度凸出线
                 .setHorizontal_kedu_line_show(true)
+
                         //设置贝塞尔区域
                 .setListPointRegion(listPointRegion)
                         //设置区域颜色
                 .setRegion_color(R.color.chart_view_region)
+
                         //设置点的内容
                 .setListPoint(listPoint)
                         //是否平滑过渡，即贝塞尔曲线过度
@@ -209,23 +212,23 @@ public class MainActivity extends Activity {
 
                         //设置点和线的颜色
                 .setPath_line_color(R.color.xiyou_pink)
-                        //保留
-                .setPoint_circle_color_interval(R.color.xiyou_pink)
-                        //保留
-                .setPoint_circle_color_outside(R.color.xiyou_white)
-                        //点的圆圈是否空心
-                .setIsPointCircleStoke(true)
+                        //点的内圆
+                .setPoint_circle_color_interval(R.color.xiyou_white)
+                        //点的外援
+                .setPoint_circle_color_outside(R.color.xiyou_pink)
+                        //内圆是否空心
+                .setIsPointCircleIntervalStoke(false)
 
                         //游标的单位文本
                 .setIndicator_title_unit("kg")
                         //游标颜色
-                .setIndicator_color(R.color.xiyou_red)
+                .setIndicator_Linecolor(R.color.xiyou_red)
                         //游标外圈颜色
-                        .setIndicator_outside_circle_color(R.color.xiyou_orange)
+                .setIndicator_outside_circle_color(R.color.xiyou_orange)
                         //游标标题颜色
                 .setIndicator_title_color(R.color.xiyou_white)
                         //游标是否跟着曲线一起上下移动
-                //.setIsIndicatorMoveWithPoint(true)
+                .setIsIndicatorMoveWithPoint(false)
                        //自定义游标背景
                 //.setIndicatorBgRes(R.drawable.tree50)
                       //设置游标半径，默认游标是圆形的
