@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
                 .setTextColor(R.color.xiyou_pink)
                 .setTextUnitColor(R.color.xiyou_pink);
         roundProgressView.init(roundProgressConfig);
-        roundProgressView.setProgress(50, true);
+        roundProgressView.setProgress(100, true);
         //roundProgressView.setProgress(90);
     }
 

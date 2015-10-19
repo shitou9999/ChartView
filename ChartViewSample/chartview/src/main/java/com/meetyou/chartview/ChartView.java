@@ -1,5 +1,6 @@
 package com.meetyou.chartview;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
 import android.graphics.Rect;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -134,7 +136,10 @@ public class ChartView extends View {
      *
      * @param config
      */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void init(ChartViewConfig config) {
+
+
         mDensity = (int) getResources().getDisplayMetrics().density;
 
         mScroller = new Scroller(mContext);
@@ -186,6 +191,9 @@ public class ChartView extends View {
         if (config.getPath_line_color() > 0)
             mPaintPath.setColor(getResources().getColor(config.getPath_line_color()));
         mPaintPath.setAntiAlias(true);
+        
+        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO)
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         //区域画笔
         mPaintPathRegion = new Paint();
