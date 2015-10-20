@@ -106,6 +106,10 @@ public class ChartView extends View {
     //游标圆圈的范围，用于判断点击区域
     private float mIndicatorX;
     private float mIndicatroY;
+    //游标字体大小
+    private float mIndicatorTitleTextSize=16;
+    private float mIndicatorTitleSubTextSize = 12;
+    private float mIndicatorUnitTextSize = 16;
 
     //是否计算值
     private boolean mIsCaculateValue = true;
@@ -267,17 +271,17 @@ public class ChartView extends View {
         mPaintIndicatorLineBottom.setAntiAlias(true);
         //游标标题
         mPaintIndicatorTitle = new Paint();
-        mPaintIndicatorTitle.setTextSize(14 * mDensity);
+        mPaintIndicatorTitle.setTextSize(mIndicatorTitleTextSize * mDensity);
         if (config.getIndicator_title_color() > 0)
             mPaintIndicatorTitle.setColor(getResources().getColor(chartViewConfig.getIndicator_title_color()));
         //游标标题单位
         mPaintIndicatorTitleUnit = new Paint();
-        mPaintIndicatorTitleUnit.setTextSize(10 * mDensity);
+        mPaintIndicatorTitleUnit.setTextSize(mIndicatorUnitTextSize * mDensity);
         if (config.getIndicator_title_color() > 0)
             mPaintIndicatorTitleUnit.setColor(getResources().getColor(chartViewConfig.getIndicator_title_color()));
         //游标子标题
         mPaintIndicatorSubTitle = new Paint();
-        mPaintIndicatorSubTitle.setTextSize(10 * mDensity);
+        mPaintIndicatorSubTitle.setTextSize(mIndicatorTitleSubTextSize * mDensity);
         if (config.getIndicator_title_color() > 0)
             mPaintIndicatorSubTitle.setColor(getResources().getColor(chartViewConfig.getIndicator_title_color()));
 
@@ -428,11 +432,11 @@ public class ChartView extends View {
             //外圆
             if(!chartViewConfig.isIndicatorMoveWithPoint()){
                 if(chartViewConfig.getIndicator_outside_circle_color()>0){
-                    canvas.drawCircle(indicator_x,line_top_y_start-radius , radius+20, mPaintIndicatorOutside);
+                    canvas.drawCircle(indicator_x,line_top_y_start-radius , radius+6*mDensity, mPaintIndicatorOutside);
                 }
             }else{
                 if(chartViewConfig.getIndicator_outside_circle_color()>0){
-                    canvas.drawCircle(indicator_x,line_top_y_start , radius+20, mPaintIndicatorOutside);
+                    canvas.drawCircle(indicator_x,line_top_y_start , radius+6*mDensity, mPaintIndicatorOutside);
                 }
             }
             //内圆
@@ -474,13 +478,15 @@ public class ChartView extends View {
         }
         Rect rectTitle = new Rect();
         mPaintIndicatorTitle.getTextBounds(tilte, 0, tilte.length(), rectTitle);
-        canvas.drawText(tilte, indicator_x - (rectTitle.width() / 2), line_top_y_start, mPaintIndicatorTitle);
-
-        //绘制游标标题单位
         String title_unit = chartViewConfig.getIndicator_title_unit();
         Rect rectTitleUnit = new Rect();
         mPaintIndicatorTitleUnit.getTextBounds(title_unit, 0, title_unit.length(), rectTitleUnit);
-        canvas.drawText(title_unit, indicator_x - (rectTitle.width() / 2) + rectTitle.width() + 10, line_top_y_start, mPaintIndicatorTitleUnit);
+
+        //绘制游标标题
+        //canvas.drawText(tilte, indicator_x - (rectTitle.width() / 2), line_top_y_start, mPaintIndicatorTitle);
+        canvas.drawText(tilte, indicator_x - ((rectTitle.width() + rectTitleUnit.width() + 2 * mDensity) / 2), line_top_y_start, mPaintIndicatorTitle);
+        //绘制游标标题单位
+        canvas.drawText(title_unit, indicator_x - ((rectTitle.width()+rectTitleUnit.width()+2*mDensity)/ 2)+rectTitle.width()+2*mDensity, line_top_y_start, mPaintIndicatorTitleUnit);
 
         //绘制游标子标题
         String tilteSub = "子标题";
@@ -492,7 +498,7 @@ public class ChartView extends View {
         }
         Rect rectTitleSub = new Rect();
         mPaintIndicatorSubTitle.getTextBounds(tilteSub, 0, tilteSub.length(), rectTitleSub);
-        canvas.drawText(tilteSub, indicator_x - (rectTitleSub.width() / 2), line_top_y_start + rectTitle.height(), mPaintIndicatorSubTitle);
+        canvas.drawText(tilteSub, indicator_x - (rectTitleSub.width() / 2), line_top_y_start + rectTitle.height()+3*mDensity, mPaintIndicatorSubTitle);
 
 
     }
@@ -732,18 +738,18 @@ public class ChartView extends View {
                     float x = kedu_x- rect.width() / 2;//- getScrollX();
                     model.current_x = x + rect.width() / 2;
                     Log.d(TAG, "-->mScreenIndex:" + mScreenIndex + "-->i:" + i + "-->x:" + x + "-->getScrollX():" + getScrollX());
-                    canvas.drawText(unit_text, x, bottomY, mPaintHorizontalLable);
+                    canvas.drawText(unit_text, x, bottomY+5*mDensity, mPaintHorizontalLable);
                 }
                 //显示水平刻度线
                 if (chartViewConfig.isHorizontal_kedu_line_show()) {
-                    canvas.drawLine(kedu_x, bottomY_y, kedu_x, bottomY_y-10, mPaintHorizontalKedu);
+                    canvas.drawLine(kedu_x, bottomY_y, kedu_x, bottomY_y-5*mDensity, mPaintHorizontalKedu);
                 }
                 unit_text = model.value_unit;
                 if (!TextUtils.isEmpty(unit_text)) {
                     Rect rect = new Rect();
                     mPaintHorizontalLableSub.getTextBounds(unit_text, 0, unit_text.length(), rect);
                     float x = (i + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() - rect.width() / 2;//- getScrollX();
-                    canvas.drawText(unit_text, x, bottomY + 40, mPaintHorizontalLableSub);
+                    canvas.drawText(unit_text, x, bottomY + 5*mDensity, mPaintHorizontalLableSub);
                 }
             }
         }
