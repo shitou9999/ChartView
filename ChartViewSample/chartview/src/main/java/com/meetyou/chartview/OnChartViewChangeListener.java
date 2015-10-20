@@ -22,4 +22,10 @@ public interface OnChartViewChangeListener {
      * @param position
      */
     public void onItemSelected(int position,Object ject);
+
+    /**
+     * 点击了游标
+     * @param position
+     */
+    public void onIndicatorClick(int position);
 }

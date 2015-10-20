@@ -218,7 +218,6 @@ public class MainActivity extends Activity {
                 .setPoint_circle_color_outside(R.color.xiyou_pink)
                         //内圆是否空心
                 .setIsPointCircleIntervalStoke(false)
-
                         //游标的单位文本
                 .setIndicator_title_unit("kg")
                         //游标颜色
@@ -230,7 +229,7 @@ public class MainActivity extends Activity {
                         //游标是否跟着曲线一起上下移动
                 .setIsIndicatorMoveWithPoint(false)
                        //自定义游标背景
-                //.setIndicatorBgRes(R.drawable.tree50)
+                 // .setIndicatorBgRes(R.drawable.tree50)
                       //设置游标半径，默认游标是圆形的
                 .setIndicator_radius(100)
 
