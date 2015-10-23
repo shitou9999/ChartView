@@ -5,11 +5,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
 import android.graphics.Rect;
+import android.graphics.Shader;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -18,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.Scroller;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +93,10 @@ public class ChartView extends View {
     private Paint mPaintIndicatorLineTop;
     //游标画笔下部分连线
     private Paint mPaintIndicatorLineBottom;
+    //线性渐变画笔
+    private Paint mPaintLinearGradient;
+    private GradientDrawable mGradientDrawableLeft;
+    private GradientDrawable mGradientDrawableRight;
 
     //手势参数
     private VelocityTracker mVelocityTracker = null;
@@ -107,9 +116,9 @@ public class ChartView extends View {
     private float mIndicatorX;
     private float mIndicatroY;
     //游标字体大小
-    private float mIndicatorTitleTextSize=16;
-    private float mIndicatorTitleSubTextSize = 12;
-    private float mIndicatorUnitTextSize = 16;
+    private float mIndicatorTitleTextSize=14;
+    private float mIndicatorTitleSubTextSize = 10;
+    private float mIndicatorUnitTextSize = 14;
 
     //是否计算值
     private boolean mIsCaculateValue = true;
@@ -193,6 +202,13 @@ public class ChartView extends View {
         mPaintHorizontalLableSub.setTextSize(10 * mDensity);
         mPaintHorizontalLableSub.setAntiAlias(true);
 
+        //渐变画笔
+        mPaintLinearGradient = new Paint();
+        mPaintLinearGradient.setStyle(Paint.Style.FILL);
+        mPaintLinearGradient.setAntiAlias(true);
+        mGradientDrawableLeft = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,config.getGridViewGradientColorLeft());
+        mGradientDrawableRight = new GradientDrawable(GradientDrawable.Orientation.RIGHT_LEFT,config.getGridViewGradientColorRight());
+
         //画线
         mPaintPath = new Paint();
         mPaintPath.setStyle(Paint.Style.STROKE);
@@ -211,7 +227,7 @@ public class ChartView extends View {
         if(chartViewConfig.getRegion_color()>0){
             mPaintPathRegion.setColor(getResources().getColor(config.getRegion_color()));
         }
-        mPaintPathRegion.setAlpha(80);
+        mPaintPathRegion.setAlpha(120);
 
         mPaintPathConnectRegion = new Paint();
         mPaintPathConnectRegion.setStyle(Paint.Style.FILL);
@@ -285,8 +301,7 @@ public class ChartView extends View {
         if (config.getIndicator_title_color() > 0)
             mPaintIndicatorSubTitle.setColor(getResources().getColor(chartViewConfig.getIndicator_title_color()));
 
-
-        invalidate();
+        update();
 
     }
 
@@ -306,13 +321,15 @@ public class ChartView extends View {
         drawPointRegion(canvas);
         //画点和线
         drawPointAndPath(canvas);
+        //画线性渐变
+        drawLinearGradient(canvas);
         //画顶部游标
         drawIndicator(canvas);
+
         //画竖向刻度和单位,放在最后是为了避免画区域部分覆盖了这个刻度
         drawVericalUnit(canvas);
         //选中初始位置
         setSelection();
-
         //当前x刻度
         mScreenIndex = getScrollX() / chartViewConfig.getItem_width();
     }
@@ -323,6 +340,27 @@ public class ChartView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
+    private void drawLinearGradient(Canvas canvas){
+        if(!chartViewConfig.isShowGridViewGradient())
+            return;
+        //第一个渐变
+        int left = getScrollX();
+        int top = 0;
+        int right = getScrollX()+20*mDensity;
+        int bottom = chartViewConfig.getRow() * chartViewConfig.getItem_height();
+        mGradientDrawableLeft.setBounds(left,top,right,bottom);
+        mGradientDrawableLeft.draw(canvas);
+
+
+        //第二个渐变
+        left = getScrollX()+getWidth()-20*mDensity;
+        top = 0;
+        right = getScrollX()+getWidth();
+        bottom = chartViewConfig.getRow() * chartViewConfig.getItem_height();
+        mGradientDrawableRight.setBounds(left,top,right,bottom);
+        mGradientDrawableRight.draw(canvas);
+
+    }
 
     /**
      * 画指示器
@@ -368,10 +406,14 @@ public class ChartView extends View {
             float x = chartViewConfig.getListPoint().get(i).x;
             if (indicator_x+5 >=(int)x) {
                 index = i;
+                if (indicator_x+5 >= (int)x && (int)x>indicator_x-5) {
+                    isAtPoint = true;
+                }else{
+                    isAtPoint =false;
+                }
                 break;
-            }
-            if (indicator_x+5 == (int)x) {
-                isAtPoint = true;
+            }else{
+                isAtPoint =false;
             }
         }
         //------ 计算上部分连线的Y方式的结束值 start
@@ -430,13 +472,15 @@ public class ChartView extends View {
             //默认游标，圆形
         }else{
             //外圆
-            if(!chartViewConfig.isIndicatorMoveWithPoint()){
-                if(chartViewConfig.getIndicator_outside_circle_color()>0){
-                    canvas.drawCircle(indicator_x,line_top_y_start-radius , radius+6*mDensity, mPaintIndicatorOutside);
-                }
-            }else{
-                if(chartViewConfig.getIndicator_outside_circle_color()>0){
-                    canvas.drawCircle(indicator_x,line_top_y_start , radius+6*mDensity, mPaintIndicatorOutside);
+            if(!isAtPoint){
+                if(!chartViewConfig.isIndicatorMoveWithPoint()){
+                    if(chartViewConfig.getIndicator_outside_circle_color()>0){
+                        canvas.drawCircle(indicator_x,line_top_y_start-radius , radius+6*mDensity, mPaintIndicatorOutside);
+                    }
+                }else{
+                    if(chartViewConfig.getIndicator_outside_circle_color()>0){
+                        canvas.drawCircle(indicator_x,line_top_y_start , radius+6*mDensity, mPaintIndicatorOutside);
+                    }
                 }
             }
             //内圆
@@ -484,7 +528,7 @@ public class ChartView extends View {
 
         //绘制游标标题
         //canvas.drawText(tilte, indicator_x - (rectTitle.width() / 2), line_top_y_start, mPaintIndicatorTitle);
-        canvas.drawText(tilte, indicator_x - ((rectTitle.width() + rectTitleUnit.width() + 2 * mDensity) / 2), line_top_y_start, mPaintIndicatorTitle);
+        canvas.drawText(tilte, indicator_x - ((rectTitle.width()+rectTitleUnit.width()+2*mDensity)/ 2), line_top_y_start, mPaintIndicatorTitle);
         //绘制游标标题单位
         canvas.drawText(title_unit, indicator_x - ((rectTitle.width()+rectTitleUnit.width()+2*mDensity)/ 2)+rectTitle.width()+2*mDensity, line_top_y_start, mPaintIndicatorTitleUnit);
 
@@ -499,7 +543,6 @@ public class ChartView extends View {
         Rect rectTitleSub = new Rect();
         mPaintIndicatorSubTitle.getTextBounds(tilteSub, 0, tilteSub.length(), rectTitleSub);
         canvas.drawText(tilteSub, indicator_x - (rectTitleSub.width() / 2), line_top_y_start + rectTitle.height()+3*mDensity, mPaintIndicatorSubTitle);
-
 
     }
 
@@ -516,6 +559,7 @@ public class ChartView extends View {
             //画横线 ,左边预留getCloumn/2个网格
             int len = 16;
             len = chartViewConfig.getCloumn() * 2 + chartViewConfig.getListHorizontalKedu().size() - 1;
+            int duan = 10;//为了避免虚线过长导致path绘制不了，每条虚线分为10段
             if(chartViewConfig.isShowGridHorizontalLine()){
                 //虚线
                 if(chartViewConfig.isGridLinePathEffect()){
@@ -524,21 +568,47 @@ public class ChartView extends View {
                         mPaintGrid.setAntiAlias(true);
                         mPaintGrid.setStyle(Paint.Style.STROKE);
                         mPaintGrid.setPathEffect(effects);
-                        mPathGridHorizontal = new Path[chartViewConfig.getRow()];
-                        for (int i = 0; i < chartViewConfig.getRow(); i++) {
-                            float startX = -chartViewConfig.getItem_width() * (chartViewConfig.getCloumn() / 2);
+                        mPathGridHorizontal = new Path[chartViewConfig.getRow()*duan];
+                        /*for (int i = 0; i < chartViewConfig.getRow(); i++) {
+                            float startX = getScrollX()-chartViewConfig.getItem_width() * chartViewConfig.getCloumn();
                             float startY = i * chartViewConfig.getItem_height();
-                            float stopX = (len - chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();//(chartViewConfig.getListHorizontalKeduValue().size() +chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
+                            float stopX =  getScrollX()+ (chartViewConfig.getListHorizontalKedu().size()+chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
                             float stopY = i * chartViewConfig.getItem_height();
                             Path path = new Path();
                             path.moveTo(startX, startY);
                             path.lineTo(stopX, stopY);
                             mPathGridHorizontal[i]=path;
-                            //canvas.drawLine(startX, startY, stopX, stopY, mPaintGrid);
+                        }*/
+                        int index = 0;
+                        for (int i = 0; i < chartViewConfig.getRow(); i++) {
+                            //每一条的开始和结束X值
+                            float start_X = getScrollX()-chartViewConfig.getItem_width() * chartViewConfig.getCloumn();
+                            float stop_X =  getScrollX()+ (chartViewConfig.getListHorizontalKedu().size()+chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
+                            //分段的间隔
+                            float jiange = (stop_X-start_X)/duan;
+                            //每一条分段的x开始和x结束
+                            for(int j=0;j<duan;j++){
+                                Path path = new Path();
+                                float startX = start_X+j*jiange;
+                                float startY = i * chartViewConfig.getItem_height();
+                                float stopX =  start_X+(j+1)*jiange;//getScrollX()+ (chartViewConfig.getListHorizontalKedu().size()+chartViewConfig.getCloumn())* chartViewConfig.getItem_width();
+                                float stopY = i * chartViewConfig.getItem_height();
+                                path.moveTo(startX, startY);
+                                path.lineTo(stopX, stopY);
+                                mPathGridHorizontal[index+j]=path;
+                            }
+                            index=(index+duan);
                         }
+
                     }
-                    for (int i = 0; i < chartViewConfig.getRow(); i++) {
-                        if (getScrollX() >= (mScreenIndex - chartViewConfig.getCloumn()) * chartViewConfig.getItem_width()
+                    final int count = (int) (chartViewConfig.getVerical_unit_end() - chartViewConfig.getVerical_unit_start()) / (int) chartViewConfig.getVerical_unit_incremetal();
+                    int start = chartViewConfig.getRow()-count;
+                    if(start>=0 && start<=chartViewConfig.getRow()-1){
+                    }else{
+                        start=0;
+                    }
+                    for (int i = start; i < chartViewConfig.getRow()*duan; i++) {
+                        if (getScrollX() >= (mScreenIndex - chartViewConfig.getCloumn()/2) * chartViewConfig.getItem_width()
                                 && getScrollX() <= (mScreenIndex + chartViewConfig.getCloumn() * 2) * chartViewConfig.getItem_width()) {
                             canvas.drawPath(mPathGridHorizontal[i],mPaintGrid);
                         }
@@ -607,7 +677,6 @@ public class ChartView extends View {
 
         //画lable line 竖线
         if(chartViewConfig.isVerical_line_show()){
-
             if (chartViewConfig.getGrid_line_kedu_color() > 0)
                 mPaintVericalKedu.setColor(getResources().getColor(chartViewConfig.getGrid_line_kedu_color()));
             mPaintVericalKedu.setStrokeWidth(mDensity);
@@ -689,7 +758,7 @@ public class ChartView extends View {
                 }
                 mPaintLable.getTextBounds(unit_text, 0, unit_text.length(), rect);
                 float x = getScrollX() + chartViewConfig.getVerical_kedu_leftmargin() - rect.width() - verical_unit_extral_x_space;
-                float y = (chartViewConfig.getRow() - i) * chartViewConfig.getItem_height();
+                float y = (chartViewConfig.getRow() - i) * chartViewConfig.getItem_height()+rect.height()/2;
                 canvas.drawText(unit_text, x, y, mPaintLable);
 
                 //是否需要刻度线
@@ -709,7 +778,7 @@ public class ChartView extends View {
         unit_text = chartViewConfig.getVerical_unit_text();
         mPaintLableUnit.getTextBounds(unit_text, 0, unit_text.length(), rectUnit);
         float x = getScrollX() + chartViewConfig.getVerical_kedu_leftmargin() - rectUnit.width() - verical_unit_extral_x_space;
-        float y = (chartViewConfig.getRow() - count - 1) * chartViewConfig.getItem_height() - verical_unit_extral_x_space;
+        float y = (chartViewConfig.getRow() - count) * chartViewConfig.getItem_height() - verical_unit_extral_x_space*2;
         canvas.drawText(unit_text, x, y, mPaintLableUnit);
     }
 
@@ -726,7 +795,7 @@ public class ChartView extends View {
         final int count = chartViewConfig.getListHorizontalKedu().size();
         //文案y轴底部
         int bottomY_y =  chartViewConfig.getRow() * chartViewConfig.getItem_height();
-        int bottomY = bottomY_y + 40;
+        //int bottomY = bottomY_y + 40;
         for (int i = 0; i < count; i++) {
             if (i >= mScreenIndex - chartViewConfig.getCloumn() / 2 && i <= mScreenIndex + chartViewConfig.getCloumn()) {
                 KeduValue model = chartViewConfig.getListHorizontalKedu().get(i);
@@ -738,7 +807,7 @@ public class ChartView extends View {
                     float x = kedu_x- rect.width() / 2;//- getScrollX();
                     model.current_x = x + rect.width() / 2;
                     Log.d(TAG, "-->mScreenIndex:" + mScreenIndex + "-->i:" + i + "-->x:" + x + "-->getScrollX():" + getScrollX());
-                    canvas.drawText(unit_text, x, bottomY+5*mDensity, mPaintHorizontalLable);
+                    canvas.drawText(unit_text, x, bottomY_y+rect.height()+5*mDensity, mPaintHorizontalLable);
                 }
                 //显示水平刻度线
                 if (chartViewConfig.isHorizontal_kedu_line_show()) {
@@ -749,7 +818,7 @@ public class ChartView extends View {
                     Rect rect = new Rect();
                     mPaintHorizontalLableSub.getTextBounds(unit_text, 0, unit_text.length(), rect);
                     float x = (i + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width() - rect.width() / 2;//- getScrollX();
-                    canvas.drawText(unit_text, x, bottomY + 5*mDensity, mPaintHorizontalLableSub);
+                    canvas.drawText(unit_text, x, bottomY_y+rect.height() + 5*mDensity, mPaintHorizontalLableSub);
                 }
             }
         }
@@ -757,9 +826,9 @@ public class ChartView extends View {
         if (chartViewConfig.getGrid_line_kedu_color() > 0)
             mPaintHorizontalKedu.setColor(getResources().getColor(chartViewConfig.getGrid_line_kedu_color()));
         mPaintHorizontalKedu.setStrokeWidth(mDensity);
-        bottomY = chartViewConfig.getRow() * chartViewConfig.getItem_height();
+        bottomY_y = chartViewConfig.getRow() * chartViewConfig.getItem_height();
         //画lable line 横线
-        canvas.drawLine(getScrollX(), bottomY, getScrollX() + getWidth(), bottomY, mPaintHorizontalKedu);
+        canvas.drawLine(getScrollX(), bottomY_y, getScrollX() + getWidth(), bottomY_y, mPaintHorizontalKedu);
 
 
     }
@@ -1071,10 +1140,10 @@ public class ChartView extends View {
         if(mIsCaculateValue){
             //计算区域坐标
             if(chartViewConfig.getListPointRegion()!=null && chartViewConfig.getListPointRegion().size()>0){
-                caculatePointRegionValue(chartViewConfig.getListPointRegion());
+                caculatePointRegionValue(chartViewConfig.getListPointRegion(),true);
             }
             //计算点的坐标
-            caculatePointRegionValue(chartViewConfig.getListPoint());
+            caculatePointRegionValue(chartViewConfig.getListPoint(),false);
             mIsCaculateValue = false;
         }
     }
@@ -1083,36 +1152,38 @@ public class ChartView extends View {
      * 更新视图
      */
     public void update(){
+        Log.d(TAG,"---------------UPDATE");
+        mScreenIndex=0;
         mIsCaculateValue = true;
+        mPathGridHorizontal= null;
+        mPathGridVerical =null;
         mPathSet=null;
         mPathSetRegion=null;
+        isFirst=true;
+        mScroller.setFinalX(0);
         invalidate();
     }
 
-    private void caculatePointRegionValue(List<PointValue> listPoint) {
+    /**
+     * 计算点的x y值
+     * @param listPoint
+     * @param bOverHorizontalKeduRange 是否允许超出横刻度范围，纯属为了排查bug
+     */
+    private void caculatePointRegionValue(List<PointValue> listPoint,boolean bOverHorizontalKeduRange) {
         if(listPoint==null || listPoint.size()==0)
             return;
 
-        //计算可见点的X轴坐标
-     /*   List<KeduValue> listHorizontalKedu = new ArrayList<>();
-        final int count_horizontal = chartViewConfig.getListHorizontalKedu().size();
-        //取出可见范围的水平刻度
-        for (int i = 0; i < count_horizontal; i++) {
-            if (i >= mScreenIndex - chartViewConfig.getCloumn() / 2 && i <= mScreenIndex + chartViewConfig.getCloumn()) {
-                KeduValue kedu = chartViewConfig.getListHorizontalKedu().get(i);
-                listHorizontalKedu.add(kedu);
-            }
-        }*/
         //遍历在这个刻度范围内的点，计算出x值
-
         KeduValue firstKeduValue = chartViewConfig.getListHorizontalKedu().get(0);
+        int index= 0;
         for (PointValue point : listPoint) {
             if (chartViewConfig.horizontal_lable_use_integer) {
+                index++;
                 //当前点的横刻度值
                 int horizontal_value = Integer.valueOf(String.valueOf(point.horizontal_value));
                 //找出当前点在第几个横刻度
                 int horizontalKeduIndex = (horizontal_value-Integer.valueOf(firstKeduValue.value))/(int)chartViewConfig.horizontal_kedu_interval[0];
-                //该横刻度的值
+                //该横刻度的值             //2370(79) 横刻度最后一个2433（92） 点的最后一个2432（4）
                 if(horizontalKeduIndex>=0 && horizontalKeduIndex < chartViewConfig.getListHorizontalKedu().size()){
                     int horizontalKeduIndex_value =Integer.valueOf(chartViewConfig.getListHorizontalKedu().get(horizontalKeduIndex).value);//horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
                     //该横刻度的x值
@@ -1125,11 +1196,20 @@ public class ChartView extends View {
                     point.x = horizontalKeduIndex_x + percent * chartViewConfig.getItem_width();
                     //不在横刻度范围内，则自己计算x值，画区域点的时候才会遇到
                 }else{
+                    //不允许超过横刻度，但此时超过了，打log
+                    if(!bOverHorizontalKeduRange){
+                        Log.e(TAG,"数据点的值超过横刻度了！！！！！该数据是："+point.horizontal_value+"--index:"+index+"--size:"+listPoint.size());
+
+                        return ;
+                    }
                     int horizontalKeduIndex_value=0;
                     if(horizontalKeduIndex<0)
                         horizontalKeduIndex_value =Integer.valueOf(chartViewConfig.getListHorizontalKedu().get(0).value)-horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
-                    else
-                        horizontalKeduIndex_value = horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    else{
+                        int size = chartViewConfig.getListHorizontalKedu().size();
+                        int lastKeduvalue = Integer.valueOf(chartViewConfig.getListHorizontalKedu().get(size-1).value);
+                        horizontalKeduIndex_value =lastKeduvalue+ (horizontalKeduIndex-size)*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    }
                     //该横刻度的x值
                     int horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
                     //计算出当前点与当前横刻度的差
@@ -1163,8 +1243,11 @@ public class ChartView extends View {
                     float horizontalKeduIndex_value=0;
                     if(horizontalKeduIndex<0)
                         horizontalKeduIndex_value =Float.valueOf(chartViewConfig.getListHorizontalKedu().get(0).value)-horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
-                    else
-                        horizontalKeduIndex_value = horizontalKeduIndex*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    else{
+                        int size = chartViewConfig.getListHorizontalKedu().size();
+                        float lastKeduvalue = Float.valueOf(chartViewConfig.getListHorizontalKedu().get(size-1).value);
+                        horizontalKeduIndex_value =lastKeduvalue+ (horizontalKeduIndex-size)*(int)chartViewConfig.horizontal_kedu_interval[0];
+                    }
                     //该横刻度的x值
                     int horizontalKeduIndex_x = (horizontalKeduIndex + chartViewConfig.getCloumn() / 2) * chartViewConfig.getItem_width();
                     //计算出当前点与当前横刻度的差
@@ -1204,7 +1287,7 @@ public class ChartView extends View {
                     if (verical_value >= Float.valueOf(String.valueOf(value))) {
                         //超过最高，取最高
                         if (verical_value >= Float.valueOf(String.valueOf(chartViewConfig.getVerical_unit_end()))) {
-                            point.y = (chartViewConfig.getRow() - i) * chartViewConfig.getItem_height();
+                            point.y = (chartViewConfig.getRow() - count_verical) * chartViewConfig.getItem_height();
                             //超过最最低，取最低
                         } else if (verical_value <= Float.valueOf(String.valueOf(chartViewConfig.getVerical_unit_start()))) {
                             point.y = (chartViewConfig.getRow()) * chartViewConfig.getItem_height();
@@ -1217,6 +1300,24 @@ public class ChartView extends View {
                     }
                 }
             }
+            if(point.y==0){
+                float verical_value = Float.valueOf(String.valueOf(point.verical_value));
+                if (chartViewConfig.verical_lable_use_integer) {
+                    if (verical_value >= (int) (chartViewConfig.getVerical_unit_end())) {
+                        point.y = (chartViewConfig.getRow() - count_verical) * chartViewConfig.getItem_height();
+                        //超过最最低，取最低
+                    } else if (verical_value <= (int) (chartViewConfig.getVerical_unit_start())) {
+                        point.y = (chartViewConfig.getRow()) * chartViewConfig.getItem_height();
+                    }
+                }else if (chartViewConfig.verical_lable_use_float) {
+                    if (verical_value >= Float.valueOf(String.valueOf(chartViewConfig.getVerical_unit_end()))) {
+                        point.y = (chartViewConfig.getRow() - count_verical) * chartViewConfig.getItem_height();
+                        //超过最最低，取最低
+                    } else if (verical_value <= Float.valueOf(String.valueOf(chartViewConfig.getVerical_unit_start()))) {
+                        point.y = (chartViewConfig.getRow()) * chartViewConfig.getItem_height();
+                    }
+                }
+            }
         }
 
     }
@@ -1226,15 +1327,16 @@ public class ChartView extends View {
     private void setSelection() {
         if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
             return;
+        Log.d(TAG,"----------------isFirst:"+isFirst);
         if (isFirst) {
             isFirst = false;
-            int selection = chartViewConfig.getItemSelection();
-            if(selection<=0){
+            mCurrentIndex = chartViewConfig.getItemSelection();
+            if(mCurrentIndex<=0){
                 mScroller.setFinalX((int) minX);
             }else{
                 boolean has =false;
                 for(int i=0;i<chartViewConfig.getListPoint().size();i++){
-                    if(selection==i){
+                    if(mCurrentIndex==i){
                         mScroller.setFinalX(getScrollX()+(int)chartViewConfig.getListPoint().get(i).x-getWidth()/2);
                         has =true;
                         break;
@@ -1282,15 +1384,21 @@ public class ChartView extends View {
      * @return
      */
     private boolean isAtIndicatorRange(MotionEvent event){
-        Log.d(TAG," mIndicatorX:"+mIndicatorX+"--mIndicatorY:"+mIndicatroY+"--event.getX:"+event.getX()+"--event.getY:"+event.getY());
-        if(event.getX()>=mIndicatorX && event.getX()<=mIndicatorX+chartViewConfig.getIndicator_radius()*2
-                && event.getY()>=mIndicatroY && event.getY()<= mIndicatroY+chartViewConfig.getIndicator_radius()*2
-                ){
+        float left = mIndicatorX;
+        float right = mIndicatorX+chartViewConfig.getIndicator_radius()*2;
+        float top = mIndicatroY;
+        float bottom = mIndicatroY+chartViewConfig.getIndicator_radius()*2;
+        float x = event.getX()+getScrollX();
+        float y = event.getY();
+        Log.d(TAG,"left:"+left +"--right:"+right+"--x:"+x+"\\n"
+                +"top"+top+"--bottom:"+bottom+"--y:"+y);
+        if(x>=left && x<=right && y>=top && y<= bottom){
             return true;
         }
         return false;
     }
 
+    private  boolean isAtInicatorRange =false;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         try {
@@ -1298,7 +1406,6 @@ public class ChartView extends View {
                 mVelocityTracker = VelocityTracker.obtain();
             }
             mVelocityTracker.addMovement(event);
-            boolean isAtInicatorRange =false;
             float x = event.getX();
             float y = event.getY();
             switch (event.getAction()) {
@@ -1339,25 +1446,30 @@ public class ChartView extends View {
                     velocityTracker.computeCurrentVelocity(1000);
                     int velocityX = (int) velocityTracker.getXVelocity();
                     int velocityY = (int) velocityTracker.getYVelocity();
+                    if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0){
+                        mScroller.setFinalX((int) 0);
+                        invalidate();
+                        break;
+                    }
                     Log.d(TAG, "velocityX:" + velocityX + "velocityY:" + velocityY + "--SNAP_VELOCITY:" + SNAP_VELOCITY);
-                    //Use.trace(TAG, "---velocityX---" + velocityX);
                     if(isAtInicatorRange){
                         isAtInicatorRange = isAtIndicatorRange(event);
                         if(isAtInicatorRange && mListener!=null){
                             mListener.onIndicatorClick(mCurrentIndex);
                         }
                     }
-
+                    //计算最大最小值
+                    getMinAndManScrollerValue();
                     //往右边滑
                     if (velocityX > SNAP_VELOCITY) {
-                        snapToScreen(false, velocityX, velocityY);
+                        handleFling(velocityX, velocityY);
                         if(mListener!=null){
                             mListener.onChartViewScrollDirection(ScrollDirection.RIGHT);
                         }
                     }
                     //往左边滑
                     else if (velocityX < -SNAP_VELOCITY) {
-                        snapToScreen(true, velocityX, velocityY);
+                        handleFling(velocityX, velocityY);
                         if(mListener!=null){
                             mListener.onChartViewScrollDirection(ScrollDirection.LEFT);
                         }
@@ -1369,7 +1481,6 @@ public class ChartView extends View {
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;
                     }
-                    //mTouchState = TOUCH_STATE_REST;
                     mIsPressd = false;
                     invalidate();
                     break;
@@ -1386,14 +1497,68 @@ public class ChartView extends View {
         return false;
     }
 
+
+    private void scrollToNearby() {
+        //当前点位置
+        mCurrentIndex = 0;
+        int indicator_x = getWidth() / 2 + getScrollX();
+        for (int i = chartViewConfig.getListPoint().size() - 1; i >= 0; i--) {
+            if (indicator_x > chartViewConfig.getListPoint().get(i).x) {
+                mCurrentIndex = i;
+                break;
+            }
+        }
+        //与后边的点的差
+        int width = 0;
+        if (mCurrentIndex + 1 < chartViewConfig.getListPoint().size()) {
+            width = (int) (chartViewConfig.getListPoint().get(mCurrentIndex + 1).x - chartViewConfig.getListPoint().get(mCurrentIndex).x);
+        }
+        int cha = indicator_x - (int) chartViewConfig.getListPoint().get(mCurrentIndex).x;
+        Log.v(TAG, "--scrollToNearby cha:" + cha + "-->indicator_x:" + indicator_x + "-->index x:" + (int) chartViewConfig.getListPoint().get(mCurrentIndex).x + "-->indicator_x:" + indicator_x);
+        //处于右半部分，往右边偏移
+        if (Math.abs(cha) >= width / 2) {
+            int dx = width - Math.abs(cha);
+            mScroller.startScroll(getScrollX(), 0, dx, 0, 250);
+            mCurrentIndex++;
+            mCurrentIndex =Math.min(mCurrentIndex,chartViewConfig.getListPoint().size()-1);//mCurrentIndex++>chartViewConfig.getListPoint().size()-1?mCurrentIndex:mCurrentIndex--;
+            invalidate();
+        } else {
+            int dx = -Math.abs(cha);
+            mScroller.startScroll(getScrollX(), 0, dx, 0, 250);
+            invalidate();
+        }
+        if(mListener!=null && chartViewConfig.getListPoint()!=null && chartViewConfig.getListPoint().size()>0){
+            mListener.onItemSelected(mCurrentIndex,chartViewConfig.getListPoint().get(mCurrentIndex));
+        }
+    }
+    /**
+     * 计算左右x的界限值
+     */
+    private void getMinAndManScrollerValue() {
+        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0){
+            int indicator_X = getWidth() / 2 + getScrollX();
+            minX = (int) (chartViewConfig.getListPoint().get(0).x - getWidth() / 2);
+            maxX = (int) chartViewConfig.getListPoint().get(chartViewConfig.getListPoint().size() - 1).x - getWidth() / 2;
+            return;
+        }
+        int indicator_X = getWidth() / 2 + getScrollX();
+        minX = (int) (chartViewConfig.getListPoint().get(0).x - getWidth() / 2);
+        maxX = (int) chartViewConfig.getListPoint().get(chartViewConfig.getListPoint().size() - 1).x - getWidth() / 2;
+        Log.d(TAG, "--getMinAndManScrollerValue minX:" + minX + "--maxX:" + maxX + "--all_width:"+chartViewConfig.getCloumn() * chartViewConfig.getItem_width()+"getScrollX():"+getScrollX()+"--indicator_X:"+indicator_X);
+    }
+
     private void snapToDestination() {
+        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
+            return;
         int nowScrollX = getScrollX();
         getMinAndManScrollerValue();
-        Log.d(TAG, "-->minX:" + minX + "-->maxX:" + maxX + "-->nowScrollX:" + nowScrollX);
+        Log.d(TAG, "-->snapToDestination minX:" + minX + "-->maxX:" + maxX + "-->nowScrollX:" + nowScrollX);
         maxX = Math.max(maxX, 0);
         if (nowScrollX < minX) {
+
             int dx = minX - nowScrollX;
-            mScroller.startScroll(getScrollX(), 0, dx, 0, Math.abs(dx));
+            Log.d(TAG, "-->dx :" + dx);
+            mScroller.startScroll(nowScrollX, 0, dx, 0, Math.abs(dx));
             invalidate();
             if(mListener!=null && chartViewConfig.getListPoint()!=null && chartViewConfig.getListPoint().size()>0){
                 mCurrentIndex = 0;
@@ -1419,43 +1584,10 @@ public class ChartView extends View {
 
     }
 
-    private void scrollToNearby() {
-        //当前点位置
-        mCurrentIndex = 0;
-        int indicator_x = getWidth() / 2 + getScrollX();
-        for (int i = chartViewConfig.getListPoint().size() - 1; i >= 0; i--) {
-            if (indicator_x > chartViewConfig.getListPoint().get(i).x) {
-                mCurrentIndex = i;
-                break;
-            }
-        }
-        //与后边的点的差
-        int width = 0;
-        if (mCurrentIndex + 1 < chartViewConfig.getListPoint().size()) {
-            width = (int) (chartViewConfig.getListPoint().get(mCurrentIndex + 1).x - chartViewConfig.getListPoint().get(mCurrentIndex).x);
-        }
-        int cha = indicator_x - (int) chartViewConfig.getListPoint().get(mCurrentIndex).x;
-        Log.v(TAG, "--cha:" + cha + "-->indicator_x:" + indicator_x + "-->index x:" + (int) chartViewConfig.getListPoint().get(mCurrentIndex).x);
-        //处于右半部分，往右边偏移
-        if (Math.abs(cha) >= width / 2) {
-            int dx = width - Math.abs(cha);
-            mScroller.startScroll(getScrollX(), 0, dx, 0, 250);
-            invalidate();
-        } else {
-            int dx = -Math.abs(cha);
-            mScroller.startScroll(getScrollX(), 0, dx, 0, 250);
-            invalidate();
-        }
-        if(mListener!=null && chartViewConfig.getListPoint()!=null && chartViewConfig.getListPoint().size()>0){
-            mListener.onItemSelected(mCurrentIndex,chartViewConfig.getListPoint().get(mCurrentIndex));
-        }
-    }
 
-
-    private void snapToScreen(boolean bScrollToLeft, int velocityX, int velocityY) {
+    private void handleFling(int velocityX, int velocityY) {
         int nowScrollX = getScrollX();
-        Log.d(TAG, "--snapToScreen nowScrollX:" + nowScrollX);
-        getMinAndManScrollerValue();
+        Log.d(TAG, "--handleFling nowScrollX:" + nowScrollX);
         //滑动距离在:
         if ((nowScrollX <= maxX) && (nowScrollX >= minX)) {
             /**
@@ -1483,9 +1615,11 @@ public class ChartView extends View {
                     }
                 }
             }, mDurationTime);
-
+            invalidate();
+        }else{
+            snapToDestination();
         }
-        //超过左边，回滚
+       /* //超过左边，回滚
         else if (nowScrollX < minX) {
             int dx = minX - nowScrollX;
             int duration = Math.abs(dx);
@@ -1503,9 +1637,9 @@ public class ChartView extends View {
                 mCurrentIndex = chartViewConfig.getListPoint().size()-1;
                 mListener.onItemSelected(mCurrentIndex,chartViewConfig.getListPoint().get(mCurrentIndex));
             }
-        }
+        }*/
 
-        invalidate();
+
     }
 
     private void scrollToNearllyPoint() {
@@ -1519,19 +1653,6 @@ public class ChartView extends View {
     private int minX;
     private int maxX;
 
-    /**
-     * 计算左右x的界限值
-     */
-    private void getMinAndManScrollerValue() {
-        //int mGridWidth = chartViewConfig.getItem_width();
-        //minX =0;
-        //maxX = (chartViewConfig.getListHorizontalKedu().size() - 1) * mGridWidth;
-        if(chartViewConfig.getListPoint()==null || chartViewConfig.getListPoint().size()==0)
-            return;
-        minX = (int) chartViewConfig.getListPoint().get(0).x - chartViewConfig.getCloumn() * chartViewConfig.getItem_width() / 2;
-        maxX = (int) chartViewConfig.getListPoint().get(chartViewConfig.getListPoint().size() - 1).x - chartViewConfig.getCloumn() * chartViewConfig.getItem_width() / 2;
-        Log.d(TAG, "--getMinAndManScrollerValue minX:" + minX + "--maxX:" + maxX);
-    }
 
 
 }

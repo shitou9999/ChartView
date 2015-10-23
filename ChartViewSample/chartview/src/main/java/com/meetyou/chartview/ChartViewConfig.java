@@ -1,6 +1,7 @@
 package com.meetyou.chartview;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,7 +37,12 @@ public class ChartViewConfig {
     private boolean isShowGridHorizontalLine = true;
     //是否使网格虚线
     private boolean isGridLinePathEffect = false;
-
+    //是否在网格左右使用渐变效果
+    private boolean isShowGridViewGradient =true;
+    //网格渐变效果的颜色设置值
+    private int end_color = 0x00ffffff;
+    private int[] GridViewGradientColorLeft=new int[]{Color.WHITE,Color.parseColor("#00ffffff")};
+    private int[] GridViewGradientColorRight=new int[]{Color.WHITE,Color.parseColor("#00ffffff")};
     //竖向 单位开始值
     private float verical_unit_start;
     //竖向 单位结束值
@@ -120,6 +126,33 @@ public class ChartViewConfig {
     //选中项
     private int item_selection;
 
+
+    public boolean isShowGridViewGradient() {
+        return isShowGridViewGradient;
+    }
+
+    public ChartViewConfig setIsShowGridViewGradient(boolean isShowGridViewGradient) {
+        this.isShowGridViewGradient = isShowGridViewGradient;
+        return this;
+    }
+
+    public int[] getGridViewGradientColorLeft() {
+        return GridViewGradientColorLeft;
+    }
+
+    public ChartViewConfig setGridViewGradientColorLeft(int[] gridViewGradientColorLeft) {
+        GridViewGradientColorLeft = gridViewGradientColorLeft;
+        return this;
+    }
+
+    public int[] getGridViewGradientColorRight() {
+        return GridViewGradientColorRight;
+    }
+
+    public ChartViewConfig setGridViewGradientColorRight(int[] gridViewGradientColorRight) {
+        GridViewGradientColorRight = gridViewGradientColorRight;
+        return this;
+    }
 
     public boolean isPointCircleIntervalStoke() {
         return isPointCircleIntervalStoke;
@@ -376,13 +409,13 @@ public class ChartViewConfig {
         if (listHorizontal.size() > 1 ) {
             if (horizontal_lable_use_integer) {
                 for (int i = 0; i <= listHorizontal.size() - 1; i++) {
-                        if(i==listHorizontal.size()-1 && i!=0){
-                            horizontal_kedu_interval[i] =  horizontal_kedu_interval[i-1];
-                        }else{
-                            int value1 = Integer.valueOf(listHorizontal.get(i + 1).value);
-                            int value = Integer.valueOf(listHorizontal.get(i).value);
-                            horizontal_kedu_interval[i] = value1 - value;
-                        }
+                    if(i==listHorizontal.size()-1 && i!=0){
+                        horizontal_kedu_interval[i] =  horizontal_kedu_interval[i-1];
+                    }else{
+                        int value1 = Integer.valueOf(listHorizontal.get(i + 1).value);
+                        int value = Integer.valueOf(listHorizontal.get(i).value);
+                        horizontal_kedu_interval[i] = value1 - value;
+                    }
                 }
             } else if (horizontal_lable_use_float) {
                 for (int i = 0; i < listHorizontal.size() - 1; i++) {
