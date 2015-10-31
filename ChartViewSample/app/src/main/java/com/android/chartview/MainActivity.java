@@ -6,13 +6,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.chartview.util.Helper;
 import com.meetyou.chartview.ChartView;
 import com.meetyou.chartview.ChartViewConfig;
 import com.meetyou.chartview.KeduValue;
 import com.meetyou.chartview.PointValue;
-import com.meetyou.roundprogressview.RoundProgressConfig;
-import com.meetyou.roundprogressview.RoundProgressView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,39 +18,17 @@ public class MainActivity extends Activity {
 
     private static final String TAG ="MainActivity" ;
     private ChartView chartview;
-    private RoundProgressView roundProgressView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initProgressView();
+
         initChartView();
     }
 
-    private void initProgressView(){
-
-        roundProgressView = (RoundProgressView)findViewById(R.id.roundProgressView);
-        RoundProgressConfig roundProgressConfig = new RoundProgressConfig();
-        roundProgressConfig
-                //.setRadius(Helper.dip2px(getApplicationContext(),50))
-                .setCircleBgColor(R.color.rcharview_cover_range_blue)
-                .setCircleInsideColor(R.color.xiyou_white)
-                .setEndColor(R.color.xiyou_pink)
-                .setStartColor(R.color.xiyou_white)
-                .setMaxProgress(100)
-                .setMinProgress(0)
-                .setTextSize(24)
-                .setTextUnitSize(16)
-                .setUnitText("分")
-                .setProgressBarWidth(Helper.dip2px(getApplicationContext(), 18))
-                .setTextColor(R.color.xiyou_pink)
-                .setTextUnitColor(R.color.xiyou_pink);
-        roundProgressView.init(roundProgressConfig);
-        roundProgressView.setProgress(100, true);
-        //roundProgressView.setProgress(90);
-    }
 
 
     private void initChartView(){
@@ -147,23 +122,23 @@ public class MainActivity extends Activity {
         config
                 //设置列数
                 .setCloumn(4)
-                //设置行数
+                        //设置行数
                 .setRow(10)
-                //设置每一个格子的高度
+                        //设置每一个格子的高度
                 .setItem_height(80)
-                //设置每一个格子的宽度
+                        //设置每一个格子的宽度
                 .setItem_width(mScreenWidth / 4)
-                //设置格子线的颜色
+                        //设置格子线的颜色
                 .setGrid_line_color(R.color.xiyou_blue)
-                //设置横竖刻度线的颜色
+                        //设置横竖刻度线的颜色
                 .setGrid_line_kedu_color(R.color.xiyou_blue)
-                //设置是否显示格子线，PS:即使不显示格子线，以上的参数还是必须设置
+                        //设置是否显示格子线，PS:即使不显示格子线，以上的参数还是必须设置
                 .setIsShowGridLine(true)
-                //横向网格显示
+                        //横向网格显示
                 .setIsShowGridHorizontalLine(true)
-                //竖向网格不显示
+                        //竖向网格不显示
                 .setIsShowGridVericalLine(false)
-                //网格空心
+                        //网格空心
                 .setIsGridLinePathEffect(true)
 
                         //设置竖向刻度左边距
@@ -204,11 +179,11 @@ public class MainActivity extends Activity {
                         //设置点的内容
                 .setListPoint(listPoint)
                         //是否平滑过渡，即贝塞尔曲线过度
-                //.setIsSmoothPoint(true)
+                        //.setIsSmoothPoint(true)
                         //是否点线闭合,闭合则需要设置闭合区域颜色
-                //.setIsFillPointRegion(true)
+                        //.setIsFillPointRegion(true)
                         //点线闭合区域颜色
-                //.setRegion_connect_color(R.color.xiyou_white)
+                        //.setRegion_connect_color(R.color.xiyou_white)
 
                         //设置点和线的颜色
                 .setPath_line_color(R.color.xiyou_pink)
@@ -228,9 +203,9 @@ public class MainActivity extends Activity {
                 .setIndicator_title_color(R.color.xiyou_white)
                         //游标是否跟着曲线一起上下移动
                 .setIsIndicatorMoveWithPoint(false)
-                       //自定义游标背景
-                 // .setIndicatorBgRes(R.drawable.tree50)
-                      //设置游标半径，默认游标是圆形的
+                        //自定义游标背景
+                        // .setIndicatorBgRes(R.drawable.tree50)
+                        //设置游标半径，默认游标是圆形的
                 .setIndicator_radius(100)
 
                         //默认选中位置

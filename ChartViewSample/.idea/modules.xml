@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/ChartViewSample.iml" filepath="$PROJECT_DIR$/ChartViewSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/chartview/chartview.iml" filepath="$PROJECT_DIR$/chartview/chartview.iml" />
-      <module fileurl="file://$PROJECT_DIR$/roundprogressview/roundprogressview.iml" filepath="$PROJECT_DIR$/roundprogressview/roundprogressview.iml" />
     </modules>
   </component>
 </project>
