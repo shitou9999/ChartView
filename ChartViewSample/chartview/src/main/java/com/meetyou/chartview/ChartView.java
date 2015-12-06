@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -332,7 +333,10 @@ public class ChartView extends View {
         setSelection();
         //当前x刻度
         mScreenIndex = getScrollX() / chartViewConfig.getItem_width();
+
     }
+
+
 
 
     @Override
@@ -829,7 +833,6 @@ public class ChartView extends View {
         bottomY_y = chartViewConfig.getRow() * chartViewConfig.getItem_height();
         //画lable line 横线
         canvas.drawLine(getScrollX(), bottomY_y, getScrollX() + getWidth(), bottomY_y, mPaintHorizontalKedu);
-
 
     }
 
